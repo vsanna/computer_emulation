@@ -4,6 +4,7 @@ import (
 	. "computer_emulation/src/bit"
 	"computer_emulation/src/cpu"
 	"computer_emulation/src/memory"
+	"fmt"
 	"os"
 )
 
@@ -24,10 +25,12 @@ func NewComputer() *Computer {
 }
 
 func (computer *Computer) Run() {
+	fmt.Println("computer starts running...")
 	// 1. load ROM from txt file
 
 	// 2. run
 	for {
+		fmt.Println("ticktack...")
 		// 1. update user input
 		// simulate RESET action by checking whether reset.txt exists or not
 		// TODO: これをbitで扱うべきか

@@ -2,6 +2,7 @@ package memory
 
 import (
 	. "computer_emulation/src/bit"
+	"fmt"
 )
 
 // 1word = 2Byte. 32bitマシンは4B
@@ -21,7 +22,9 @@ func NewWord() *Word {
 
 func (word *Word) Pass(in *Bus, load *Bit) *Bus {
 	out := NewBus(BusOption{})
-	for idx, bit := range in.Bits {
+	for idx, reg := range word.registers {
+		bit := reg.dff.GetPreviousBit()
+		fmt.Printf("=======\n%v\n", bit)
 		out.Bits[idx] = word.registers[idx].Pass(bit, load)
 	}
 	return out

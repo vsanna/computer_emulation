@@ -1,7 +1,6 @@
 package memory
 
 import (
-	. "computer_emulation/src/bit"
 	"testing"
 )
 
