@@ -93,3 +93,15 @@ func (bus *Bus) Equals(other *Bus) bool {
 	}
 	return true
 }
+
+func (bus *Bus) ToInt() int {
+	n := 0
+	for idx, b := range bus.Bits {
+		n = n + b.GetVal()
+		if idx != len(bus.Bits)-1 {
+			n = n << 1
+		}
+	}
+
+	return n
+}

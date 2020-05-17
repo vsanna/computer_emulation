@@ -30,7 +30,8 @@ func (computer *Computer) Run() {
 	// 1. load ROM from txt file
 	program := "0000111111111111\n" + // @4095 / SET A 4095
 		"0000000000001101\n" + // @13 / SET A 13
-		"1110111111010000" // D=1 / SET D 1
+		"1110111111010000\n" + // D=1 / SET D 1
+		""
 	computer.memory.Load(program)
 
 	// 2. run
@@ -55,9 +56,10 @@ func (computer *Computer) Run() {
 	}
 }
 
+// TODO: 図をここに貼る
+// TODO: debugコードをflagで出し分け
 func (computer *Computer) ticktack(reset *Bit) {
 	computer.cpu.ShowDebugInfo()
-	// TODO: 図をここに貼る
 	cpuOutput, resetBit := computer.cpu.StartTicktack(reset)
 	memoryOutput := computer.memory.Pass(nil, OFF, cpuOutput)
 	computer.cpu.Pass(memoryOutput, resetBit)

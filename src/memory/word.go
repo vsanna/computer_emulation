@@ -4,6 +4,7 @@ import (
 	"computer_emulation/src/bit"
 	. "computer_emulation/src/bit"
 	"fmt"
+	"log"
 	"strconv"
 )
 
@@ -53,6 +54,7 @@ func (word *Word) Load(instruction string) {
 		panic(fmt.Sprintf("instruction is too long. max bit length per one instruction is %d", WORD_WIDTH))
 	}
 
+	log.Printf("[DEBUG] loading program: %s\n", instruction)
 	for idx, _ := range instruction {
 		rawbit := string([]rune(instruction)[idx])
 		b, err := strconv.ParseInt(rawbit, 10, 4)

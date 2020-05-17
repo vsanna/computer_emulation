@@ -7,10 +7,11 @@ import (
 
 type Decoder struct {
 	multibit_multi_plexer *gate.MultibitMultiPlexer
+	not                   *gate.Not
 }
 
 func NewDecoder() *Decoder {
-	return &Decoder{multibit_multi_plexer: gate.NewMultibitMultiPlexer()}
+	return &Decoder{multibit_multi_plexer: gate.NewMultibitMultiPlexer(), not: gate.NewNot()}
 }
 
 func (decoder *Decoder) Pass(in *Bus) (
@@ -20,7 +21,7 @@ func (decoder *Decoder) Pass(in *Bus) (
 	destBus *Bus,
 	jumpBus *Bus,
 ) {
-	isCommandA = in.Bits[0]
+	isCommandA = decoder.not.Pass(in.Bits[0])
 	address = NewBus(BusOption{
 		Bits: []int{
 			0,

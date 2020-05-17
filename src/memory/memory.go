@@ -24,7 +24,8 @@ func NewMemory() *Memory {
 
 // load:1で新しい値に上書き(writeモード)
 func (memory *Memory) Pass(in *Bus, load *Bit, address *Bus) *Bus {
-	addressInt := 1 // TODO: Bus -> intを行う回路
+	// TODO: このToIntはずる。
+	addressInt := address.ToInt()
 	return memory.words[addressInt].Pass(in, load)
 }
 

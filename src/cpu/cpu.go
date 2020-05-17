@@ -54,6 +54,9 @@ func (cpu *Cpu) StartTicktack(reset *Bit) (*Bus, *Bit) {
 func (cpu *Cpu) Pass(in *Bus, resetBit *Bit) {
 	// 1. decode
 	isCommandA, address, opsBus, destBus, jumpBus := cpu.decode(in)
+	log.Printf("[DEBUG] isCommandA=%v, address=%v, opsBus=%v, destBus=%v, jumpBus=%v\n",
+		isCommandA, address, opsBus, destBus, jumpBus,
+	)
 	// 2-1. commandA: update A register
 	cpu.a_reg.Pass(address, isCommandA)
 	// 2-2-1. commandB: prepare commandB
@@ -103,11 +106,12 @@ func (cpu *Cpu) Reset(resetBit *Bit) {
 
 func (cpu *Cpu) ShowDebugInfo() {
 	log.Printf(
-		"[DEBUG] A=%v, D=%v, M=%v, PC=%v\n",
+		"[DEBUG] A=%v, D=%v, M=%v, PC=%v, INST=%v\n",
 		cpu.a_reg.ToInt(),
 		cpu.d_reg.ToInt(),
 		cpu.memory.Pass(nil, OFF, cpu.a_reg.Pass(nil, OFF)),
 		cpu.pc_reg.ToInt(),
+		cpu.memory.Pass(nil, OFF, cpu.pc_reg.Pass(nil, OFF)),
 	)
 }
 
