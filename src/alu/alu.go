@@ -5,7 +5,6 @@ import (
 	"computer_emulation/src/bit"
 	. "computer_emulation/src/bit"
 	"computer_emulation/src/gate"
-	"fmt"
 )
 
 type Alu struct {
@@ -48,7 +47,6 @@ func (alu *Alu) Pass(
 		zerofyA,
 		negatex,
 	)
-	fmt.Printf("a: %v\n", negatedA)
 
 	zerofyB := alu.multi_plexer.Pass(
 		bit.NewBus(BusOption{}),
@@ -60,7 +58,6 @@ func (alu *Alu) Pass(
 		zerofyB,
 		negatey,
 	)
-	fmt.Printf("b: %v\n", negatedB)
 
 	functionApplied := alu.multi_plexer.Pass(
 		alu.adder.Pass(negatedA, negatedB),

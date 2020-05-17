@@ -7,6 +7,7 @@ import (
 	"computer_emulation/src/gate"
 	"computer_emulation/src/memory"
 	"computer_emulation/src/register"
+	"log"
 )
 
 /*register
@@ -98,6 +99,16 @@ func (cpu *Cpu) Pass(in *Bus, resetBit *Bit) {
 func (cpu *Cpu) Reset(resetBit *Bit) {
 	cpu.pc_reg.Pass(bit.NewBus(BusOption{Bits: []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}), resetBit)
 	return
+}
+
+func (cpu *Cpu) ShowDebugInfo() {
+	log.Printf(
+		"[DEBUG] A=%v, D=%v, M=%v, PC=%v\n",
+		cpu.a_reg.ToInt(),
+		cpu.d_reg.ToInt(),
+		cpu.memory.Pass(nil, OFF, cpu.a_reg.Pass(nil, OFF)),
+		cpu.pc_reg.ToInt(),
+	)
 }
 
 func (cpu *Cpu) decode(in *Bus) (

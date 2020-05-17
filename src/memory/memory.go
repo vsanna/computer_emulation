@@ -2,6 +2,8 @@ package memory
 
 import (
 	. "computer_emulation/src/bit"
+	"fmt"
+	"strings"
 )
 
 // 16bitバスなのでアドレスの個数上限が65536
@@ -24,4 +26,17 @@ func NewMemory() *Memory {
 func (memory *Memory) Pass(in *Bus, load *Bit, address *Bus) *Bus {
 	addressInt := 1 // TODO: Bus -> intを行う回路
 	return memory.words[addressInt].Pass(in, load)
+}
+
+// NOTE: This simulate ROM by loading machine language program from text file.
+func (memory *Memory) Load(machine_lang_program string) {
+	lines := strings.Split(machine_lang_program, "\n")
+
+	if len(lines) > MEMORY_LENGTH {
+		panic(fmt.Sprintf("program is too long. max line length is %d", MEMORY_LENGTH))
+	}
+
+	for idx, line := range lines {
+		memory.words[idx].Load(line)
+	}
 }

@@ -21,3 +21,7 @@ func (register *RegisterCell) Pass(in *Bit, load *Bit) *Bit {
 	register.dff.Pass(newIn)
 	return out
 }
+
+func (register *RegisterCell) String() string {
+	return register.dff.GetPreviousBit().String()
+}
