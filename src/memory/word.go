@@ -51,7 +51,7 @@ func (word *Word) String() string {
 
 func (word *Word) Load(instruction string) {
 	if len(instruction) != WORD_WIDTH {
-		panic(fmt.Sprintf("instruction is too long. max bit length per one instruction is %d", WORD_WIDTH))
+		panic(fmt.Sprintf("instruction doesn't has proper length. bit length per one instruction should be %d", WORD_WIDTH))
 	}
 
 	log.Printf("[DEBUG] loading program: %s\n", instruction)
