@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	fmt.Println("start")
+	fmt.Println("[HARDWARE] start main process.")
 	machine := computer.NewComputer()
 	machine.Run()
 }

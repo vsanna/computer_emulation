@@ -1,6 +1,7 @@
 package computer
 
 import (
+	"computer_emulation/src/assembler"
 	. "computer_emulation/src/bit"
 	"computer_emulation/src/cpu"
 	"computer_emulation/src/memory"
@@ -13,6 +14,7 @@ import (
 type Computer struct {
 	memory *memory.Memory
 	cpu    *cpu.Cpu
+	assm   *assembler.Assembler
 }
 
 func NewComputer() *Computer {
@@ -20,14 +22,16 @@ func NewComputer() *Computer {
 	computer := &Computer{
 		memory: memory,
 		cpu:    cpu.NewCpu(memory),
+		assm:   assembler.New(),
 	}
 
 	return computer
 }
 
 func (computer *Computer) Run() {
-	log.Printf("computer starts running....\n")
+	log.Printf("[HARDWARE] computer starts running....\n")
 	// 1. load ROM from txt file
+	// this is corresponding to Booting phase of CPU.
 	program := "0000111111111111\n" + // @4095 / SET A 4095
 		"1110111111001000\n" + // M=1
 		"1111110111001000\n" + // M=M+1
@@ -41,10 +45,10 @@ func (computer *Computer) Run() {
 		"1110111111011000\n" + // DM=1
 		"1110111111101000\n" + // AM=1
 		"1110111111111000" // ADM=1
-	computer.memory.Load(program)
+	computer.memory.LoadExecutable(program)
 
 	// 2. run
-	// use infinite for loop instead of clock
+	// use infinite loop instead of clock
 	for {
 		// 1. update user input
 		// simulate RESET action by checking whether reset.txt exists or not

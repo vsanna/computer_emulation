@@ -2,6 +2,7 @@ package assembler
 
 import (
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -22,5 +23,7 @@ func main() {
 		}
 	}
 
-	program := 
+	assm := New()
+	program := assm.FromFile(filename)
+	log.Print(program)
 }

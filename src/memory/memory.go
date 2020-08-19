@@ -6,9 +6,13 @@ import (
 	"strings"
 )
 
-// 16bitバスなのでアドレスの個数上限が65536
-// 2B * 1024 * 64 = 128KB
+// 16bitバスなのでアドレスの個数上限が2**16 = 65536
+// 2Byte/word * (2**16) = 128KB
+// NOTE: 2**16 == 2**10 * 2**6
 const MEMORY_LENGTH = 1024 * 64
+
+// うち、機械語を載せられるtextareaは0 - 1023まで
+const TEXTAREA_MAX_LINENUM = 1023
 
 type Memory struct {
 	words []*Word
@@ -30,11 +34,11 @@ func (memory *Memory) Pass(in *Bus, load *Bit, address *Bus) *Bus {
 }
 
 // NOTE: This simulate ROM by loading machine language program from text file.
-func (memory *Memory) Load(machine_lang_program string) {
+func (memory *Memory) LoadExecutable(machine_lang_program string) {
 	lines := strings.Split(machine_lang_program, "\n")
 
-	if len(lines) > MEMORY_LENGTH {
-		panic(fmt.Sprintf("program is too long. max line length is %d", MEMORY_LENGTH))
+	if len(lines) > TEXTAREA_MAX_LINENUM {
+		panic(fmt.Sprintf("program is too long. max line length is %d", TEXTAREA_MAX_LINENUM))
 	}
 
 	for idx, line := range lines {
