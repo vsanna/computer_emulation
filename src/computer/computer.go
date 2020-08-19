@@ -32,19 +32,22 @@ func (computer *Computer) Run() {
 	log.Printf("[HARDWARE] computer starts running....\n")
 	// 1. load ROM from txt file
 	// this is corresponding to Booting phase of CPU.
-	program := "0000111111111111\n" + // @4095 / SET A 4095
-		"1110111111001000\n" + // M=1
-		"1111110111001000\n" + // M=M+1
-		"1111110111001000\n" + // M=M+1
-		"0000000000001101\n" + // @13 / SET A 13
-		"1110111111000000\n" + // どこにもセットしない
-		"1110111111100000\n" + // A=1
-		"1110111111010000\n" + // D=1
-		"1110111111001000\n" + // M=1
-		"1110111111110000\n" + // AD=1
-		"1110111111011000\n" + // DM=1
-		"1110111111101000\n" + // AM=1
-		"1110111111111000" // ADM=1
+	// TODO: write actual code here instead of calling assember here
+	assm := assembler.New()
+	program := assm.FromFile("./main.asm")
+	//program := "0000111111111111\n" + // @4095 / SET A 4095
+	//	"1110111111001000\n" + // M=1
+	//	"1111110111001000\n" + // M=M+1
+	//	"1111110111001000\n" + // M=M+1
+	//	"0000000000001101\n" + // @13 / SET A 13
+	//	"1110111111000000\n" + // どこにもセットしない
+	//	"1110111111100000\n" + // A=1
+	//	"1110111111010000\n" + // D=1
+	//	"1110111111001000\n" + // M=1
+	//	"1110111111110000\n" + // AD=1
+	//	"1110111111011000\n" + // DM=1
+	//	"1110111111101000\n" + // AM=1
+	//	"1110111111111000" // ADM=1
 	computer.memory.LoadExecutable(program)
 
 	// 2. run
@@ -65,7 +68,7 @@ func (computer *Computer) Run() {
 		// 3. update user output
 
 		// 4. for debugging:
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 

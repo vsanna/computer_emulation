@@ -54,12 +54,15 @@ func (cpu *Cpu) StartTicktack(reset *Bit) (*Bus, *Bit) {
 func (cpu *Cpu) Pass(in *Bus, resetBit *Bit) {
 	// 1. decode
 	isCommandA, address, opsBus, destBus, jumpBus := cpu.decode(in)
-	log.Printf("[DEBUG] isCommandA=%v, address=%v, opsBus=%v, destBus=%v, jumpBus=%v\n",
-		isCommandA, address, opsBus, destBus, jumpBus,
+	log.Printf("[DEBUG] inst=%v, isCommandA=%v, opsBus=%v, destBus=%v, jumpBus=%v\n",
+		address, isCommandA, opsBus, destBus, jumpBus,
 	)
 	// 2-1. commandA: update A register
 	cpu.a_reg.Pass(address, isCommandA)
+
 	// 2-2-1. commandB: prepare commandB
+	// opsBusの内容に応じて、入力ソースをnull(0), A, D, Mの4つのうちから2つ選択する
+	// ALUに応じた処理flagをopsCodeBusとして取得
 	xBus, yBus, opsCodeBus := cpu.comp.Pass(
 		cpu.a_reg.Pass(nil, OFF),
 		cpu.d_reg.Pass(nil, OFF),
@@ -67,6 +70,7 @@ func (cpu *Cpu) Pass(in *Bus, resetBit *Bit) {
 		opsBus,
 	)
 	// 2-2-2. commandB: calculation
+	// 2つの入力系統と、6つのflag
 	aluOutput, outputIsZero, outputIsNegative := cpu.alu.Pass(
 		xBus,
 		yBus,
@@ -77,6 +81,7 @@ func (cpu *Cpu) Pass(in *Bus, resetBit *Bit) {
 		opsCodeBus.Bits[4],
 		opsCodeBus.Bits[5],
 	)
+
 	// 2-2-3. commandB: update register/memory
 	loadA, loadD, loadM := cpu.dest.Pass(destBus)
 	cpu.memory.Pass(aluOutput, loadM, cpu.a_reg.Pass(nil, OFF))
@@ -106,7 +111,7 @@ func (cpu *Cpu) Reset(resetBit *Bit) {
 
 func (cpu *Cpu) ShowDebugInfo() {
 	log.Printf(
-		"[DEBUG] A=%v, D=%v, M=%v, PC=%v, INST=%v\n",
+		"[DEBUG] A=%v, D=%v, M(Memory[A])=%v, PC=%v:NEXT_INST=%v\n",
 		cpu.a_reg.ToInt(),
 		cpu.d_reg.ToInt(),
 		cpu.memory.Pass(nil, OFF, cpu.a_reg.Pass(nil, OFF)),

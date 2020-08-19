@@ -5,7 +5,7 @@ import (
 	"computer_emulation/src/assembler/tokenizer"
 	"computer_emulation/src/bit"
 	"computer_emulation/src/memory"
-	"github.com/labstack/gommon/log"
+	"log"
 	"os"
 	"strconv"
 )
@@ -51,6 +51,7 @@ func (t *Translator) Translate() string {
 		if len(translatedStatement) == 0 {
 			continue
 		}
+		log.Printf("[DEBUG] line=[%d]%q, binary=%q", statement.LineNumber(), statement.String(), translatedStatement)
 
 		result += translatedStatement
 		if i != len(t.program.Statements)-1 {
@@ -70,7 +71,7 @@ func (t *Translator) translateStatement(statement ast.Statement) string {
 	case *ast.OpsAndJumpStatement:
 		return t.translateOpsAndJumpStatement(stmt)
 	default:
-		log.Error("unknown statement has come")
+		log.Fatalf("unknown statement has come")
 		os.Exit(1)
 	}
 	return ""
@@ -91,7 +92,7 @@ func (t *Translator) buildEnvironment() {
 		case *ast.AddressTaggingStatement:
 			if stmt.Value.Type == tokenizer.IDENT {
 				// symbol -> address of value, so it should be less than or equal to memory.TEXTAREA_MAX_LINENUM
-				t.environment[stmt.Value.Literal] = stmt.LineNumber() + 1
+				t.environment[stmt.Value.Literal] = stmt.LineNumber()
 			}
 		case *ast.OpsAndJumpStatement:
 			// OpsAndJumpStatement cannot have IDENT in it.
@@ -108,7 +109,7 @@ func (t *Translator) translateAllocationStatement(stmt *ast.AllocationStatement)
 	} else {
 		address, err := strconv.Atoi(stmt.Value.Literal)
 		if err != nil {
-			log.Error("invalid combination of literal and tokentype")
+			log.Fatalf("invalid combination of literal and tokentype")
 			os.Exit(1)
 		}
 		return intToBinaryString(address)
@@ -148,11 +149,11 @@ func (t *Translator) translateOpsAndJumpStatement(stmt *ast.OpsAndJumpStatement)
 			case "1":
 				compBits = []int{1, 1, 1, 1, 1, 1}
 			default:
-				log.Error("invalid comp")
+				log.Fatalf("invalid comp")
 				os.Exit(1)
 			}
 		default:
-			log.Error("invalid comp")
+			log.Fatalf("invalid comp")
 			os.Exit(1)
 		}
 	case 2:
@@ -172,7 +173,7 @@ func (t *Translator) translateOpsAndJumpStatement(stmt *ast.OpsAndJumpStatement)
 				aBit = 0
 				compBits = []int{1, 1, 1, 0, 1, 0}
 			default:
-				log.Error("invalid comp")
+				log.Fatalf("invalid comp")
 				os.Exit(1)
 			}
 		case tokenizer.BANG:
@@ -187,11 +188,11 @@ func (t *Translator) translateOpsAndJumpStatement(stmt *ast.OpsAndJumpStatement)
 				aBit = 1
 				compBits = []int{1, 1, 0, 0, 0, 1}
 			default:
-				log.Error("invalid comp")
+				log.Fatalf("invalid comp")
 				os.Exit(1)
 			}
 		default:
-			log.Error("invalid comp")
+			log.Fatalf("invalid comp")
 			os.Exit(1)
 		}
 	case 3:
@@ -303,7 +304,7 @@ func (t *Translator) translateOpsAndJumpStatement(stmt *ast.OpsAndJumpStatement)
 			compBits = []int{0, 1, 0, 1, 0, 1}
 		}
 	default:
-		log.Error("too many Comp")
+		log.Fatalf("too many Comp")
 		os.Exit(1)
 	}
 

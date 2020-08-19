@@ -120,7 +120,7 @@ func (p *Parser) parseAddressTaggingStatement() ast.Statement {
 
 	statement.Value = p.currentToken
 	statement.Line = p.currentLine
-	p.currentLine += 1
+	//p.currentLine += 1
 
 	// move to (val[)]
 	if !p.expectPeek(tokenizer.RPAREN) {

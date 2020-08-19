@@ -21,7 +21,10 @@ func (decoder *Decoder) Pass(in *Bus) (
 	destBus *Bus,
 	jumpBus *Bus,
 ) {
+	// 先頭1bitのみで決定
 	isCommandA = decoder.not.Pass(in.Bits[0])
+
+	// TODO: これ何に使うのか
 	address = NewBus(BusOption{
 		Bits: []int{
 			0,
@@ -43,6 +46,9 @@ func (decoder *Decoder) Pass(in *Bus) (
 		},
 	})
 
+	// C命令(Aレジスタへの値の格納)の場合は[4,9]までを使う。
+	// その使うパスだけを先頭に寄せる処理。
+	// A命令の場合は何も使わない
 	opsBus = decoder.multibit_multi_plexer.Pass(
 		NewBus(BusOption{}),
 		NewBus(BusOption{
