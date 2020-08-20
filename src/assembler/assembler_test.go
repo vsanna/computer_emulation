@@ -14,8 +14,8 @@ func TestAssembler_FromString(t *testing.T) {
 		want string
 	}{
 		// TODO: Add test cases.
-		{"test1", args{assemblerCode: "0;"}, "0000000000000000"},
-		{"test2", args{assemblerCode: "ADM=M+1;"}, "0000000000000000"},
+		{"test1", args{assemblerCode: "0;"}, "1110101010000000"},
+		{"test2", args{assemblerCode: "ADM=M+1;"}, "1111110111111000"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

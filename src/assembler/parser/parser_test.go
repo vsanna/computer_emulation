@@ -44,9 +44,39 @@ func TestParser_ParseProgram_LineNumber(t *testing.T) {
 		t.Fatalf("program.Statements doesn't have 25 statements. got=%d", len(program.Statements))
 	}
 
+	tests := []struct {
+		expectedLineNumber int
+	}{
+		{expectedLineNumber: 0},
+		{expectedLineNumber: 1},
+		{expectedLineNumber: 2},
+		{expectedLineNumber: 3},
+		{expectedLineNumber: 4},
+		{expectedLineNumber: 4},
+		{expectedLineNumber: 5},
+		{expectedLineNumber: 6},
+		{expectedLineNumber: 7},
+		{expectedLineNumber: 8},
+		{expectedLineNumber: 9},
+		{expectedLineNumber: 10},
+		{expectedLineNumber: 11},
+		{expectedLineNumber: 12},
+		{expectedLineNumber: 13},
+		{expectedLineNumber: 14},
+		{expectedLineNumber: 15},
+		{expectedLineNumber: 16},
+		{expectedLineNumber: 17},
+		{expectedLineNumber: 18},
+		{expectedLineNumber: 18},
+		{expectedLineNumber: 19},
+		{expectedLineNumber: 20},
+		{expectedLineNumber: 21},
+		{expectedLineNumber: 22},
+	}
+
 	for i, statement := range program.Statements {
-		if statement.LineNumber() != i {
-			t.Fatalf("unexpected LineNumber(). expected=%d, actual=%d", i, statement.LineNumber())
+		if statement.LineNumber() != tests[i].expectedLineNumber {
+			t.Fatalf("unexpected LineNumber(). expected=%d, actual=%d, stmt = %s", tests[i].expectedLineNumber, statement.LineNumber(), statement)
 		}
 	}
 }

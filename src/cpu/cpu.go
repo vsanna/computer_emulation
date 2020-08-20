@@ -54,9 +54,8 @@ func (cpu *Cpu) StartTicktack(reset *Bit) (*Bus, *Bit) {
 func (cpu *Cpu) Pass(in *Bus, resetBit *Bit) {
 	// 1. decode
 	isCommandA, address, opsBus, destBus, jumpBus := cpu.decode(in)
-	log.Printf("[DEBUG] inst=%v, isCommandA=%v, opsBus=%v, destBus=%v, jumpBus=%v\n",
-		address, isCommandA, opsBus, destBus, jumpBus,
-	)
+	cpu.ShowDebugInfoForOperation(address, isCommandA, opsBus, destBus, jumpBus)
+
 	// 2-1. commandA: update A register
 	cpu.a_reg.Pass(address, isCommandA)
 
@@ -109,14 +108,25 @@ func (cpu *Cpu) Reset(resetBit *Bit) {
 	return
 }
 
-func (cpu *Cpu) ShowDebugInfo() {
+func (cpu *Cpu) ShowDebugInfoForStatus() {
 	log.Printf(
-		"[DEBUG] A=%v, D=%v, M(Memory[A])=%v, PC=%v:NEXT_INST=%v\n",
+		"[DEBUG] A=%v, D=%v, M(Memory[A])=%v, PC=%v(%v):NEXT_INST=%v\n",
 		cpu.a_reg.ToInt(),
 		cpu.d_reg.ToInt(),
-		cpu.memory.Pass(nil, OFF, cpu.a_reg.Pass(nil, OFF)),
+		cpu.memory.Pass(nil, OFF, cpu.a_reg.Pass(nil, OFF)).ToInt(),
 		cpu.pc_reg.ToInt(),
+		cpu.pc_reg.ToInt()-memory.PROGRAM_MEMORY_BASE,
 		cpu.memory.Pass(nil, OFF, cpu.pc_reg.Pass(nil, OFF)),
+	)
+}
+
+func (cpu *Cpu) ShowDebugInfoForOperation(address *Bus, isCommandA *Bit, opsBus *Bus, destBus *Bus, jumpBus *Bus) {
+	log.Printf("[DEBUG]\t\t\t\t\t\tinst=%v => isCommandA=%v opsBus=%v, destBus=%v, jumpBus=%v\n",
+		address,
+		isCommandA,
+		[]*bit.Bit{opsBus.Bits[0], opsBus.Bits[1], opsBus.Bits[2], opsBus.Bits[3], opsBus.Bits[4], opsBus.Bits[5], opsBus.Bits[6]},
+		[]*bit.Bit{destBus.Bits[0], destBus.Bits[1], destBus.Bits[2]},
+		[]*bit.Bit{jumpBus.Bits[0], jumpBus.Bits[1], jumpBus.Bits[2]},
 	)
 }
 

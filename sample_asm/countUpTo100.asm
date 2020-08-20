@@ -5,7 +5,7 @@
 (LOOP)
 	@i
 	D=M;
-	@4
+	@5
 	D=D-A;
 	@END
 	D;JGT

@@ -51,7 +51,7 @@ func (t *Translator) Translate() string {
 		if len(translatedStatement) == 0 {
 			continue
 		}
-		log.Printf("[DEBUG] line=[%d]%q, binary=%q", statement.LineNumber(), statement.String(), translatedStatement)
+		log.Printf("[DEBUG] line[%d] = %q, binary=%q", statement.LineNumber(), statement.String(), translatedStatement)
 
 		result += translatedStatement
 		if i != len(t.program.Statements)-1 {
@@ -83,16 +83,18 @@ func (t *Translator) buildEnvironment() {
 		case *ast.AllocationStatement:
 			if stmt.Value.Type == tokenizer.IDENT {
 				if _, ok := t.environment[stmt.Value.Literal]; !ok {
-					// symbol -> address of value, so it should be greater than or equal to memory.TEXTAREA_MAX_LINENUM + 1
+					// symbol -> address of value in environment. those values are stored where the address is larger than equal to ASSEMBLY_ENVIRONMENT_FROM
 					// this is corresponding to memory allocation
-					t.environment[stmt.Value.Literal] = memory.TEXTAREA_MAX_LINENUM + 1 + t.currentTextAreaLine
+					t.environment[stmt.Value.Literal] = memory.SYMBOL_ENV_BASE_ADDRESS + t.currentTextAreaLine
+					log.Printf("%s is placed in an address(%d)", stmt.Value.Literal, t.environment[stmt.Value.Literal])
 					t.currentTextAreaLine += 1
 				}
 			}
 		case *ast.AddressTaggingStatement:
 			if stmt.Value.Type == tokenizer.IDENT {
-				// symbol -> address of value, so it should be less than or equal to memory.TEXTAREA_MAX_LINENUM
-				t.environment[stmt.Value.Literal] = stmt.LineNumber()
+				// symbol -> address of a line of program, so it should be more than or equal to memory.PROGRAM_MEMORY_BASE
+				log.Printf("stmt = %s, address = %d", stmt, memory.PROGRAM_MEMORY_BASE+stmt.LineNumber())
+				t.environment[stmt.Value.Literal] = memory.PROGRAM_MEMORY_BASE + stmt.LineNumber()
 			}
 		case *ast.OpsAndJumpStatement:
 			// OpsAndJumpStatement cannot have IDENT in it.
@@ -103,9 +105,12 @@ func (t *Translator) buildEnvironment() {
 // A command: 0 v v v v v v v v v v v v v v v
 func (t *Translator) translateAllocationStatement(stmt *ast.AllocationStatement) string {
 	if stmt.Value.Type == tokenizer.IDENT {
+		// NOTE. env table are placed in DATA_MEMORY_BASE + 16~
 		// envから値をとってきてbinaryにして放り込み
 		address := t.environment[stmt.Value.Literal]
-		return intToBinaryString(address)
+		binaryString := intToBinaryString(address)
+		log.Printf("the address of %s is %d. binaryString is %s", stmt.Value.Literal, address, binaryString)
+		return binaryString
 	} else {
 		address, err := strconv.Atoi(stmt.Value.Literal)
 		if err != nil {
