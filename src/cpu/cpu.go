@@ -17,7 +17,8 @@ pc
 */
 
 type Cpu struct {
-	memory                *memory.Memory
+	data_memory           *memory.Memory
+	program_memory        *memory.Memory // ROM
 	alu                   *alu.Alu
 	decoder               *Decoder
 	comp                  *alu.Comp
@@ -30,9 +31,10 @@ type Cpu struct {
 	multibit_multi_plexer *gate.MultibitMultiPlexer
 }
 
-func NewCpu(mem *memory.Memory) *Cpu {
+func NewCpu(data_memo *memory.Memory, program_memory *memory.Memory) *Cpu {
 	return &Cpu{
-		memory:                mem,
+		data_memory:           data_memo,
+		program_memory:        program_memory,
 		alu:                   alu.NewAlu(),
 		decoder:               NewDecoder(),
 		comp:                  alu.NewComp(),
@@ -65,7 +67,7 @@ func (cpu *Cpu) Pass(in *Bus, resetBit *Bit) {
 	xBus, yBus, opsCodeBus := cpu.comp.Pass(
 		cpu.a_reg.Pass(nil, OFF),
 		cpu.d_reg.Pass(nil, OFF),
-		cpu.memory.Pass(nil, OFF, cpu.a_reg.Pass(nil, OFF)),
+		cpu.data_memory.Pass(nil, OFF, cpu.a_reg.Pass(nil, OFF)),
 		opsBus,
 	)
 	// 2-2-2. commandB: calculation
@@ -83,7 +85,7 @@ func (cpu *Cpu) Pass(in *Bus, resetBit *Bit) {
 
 	// 2-2-3. commandB: update register/memory
 	loadA, loadD, loadM := cpu.dest.Pass(destBus)
-	cpu.memory.Pass(aluOutput, loadM, cpu.a_reg.Pass(nil, OFF))
+	cpu.data_memory.Pass(aluOutput, loadM, cpu.a_reg.Pass(nil, OFF))
 	cpu.a_reg.Pass(aluOutput, loadA)
 	cpu.d_reg.Pass(aluOutput, loadD)
 
@@ -110,18 +112,17 @@ func (cpu *Cpu) Reset(resetBit *Bit) {
 
 func (cpu *Cpu) ShowDebugInfoForStatus() {
 	log.Printf(
-		"[DEBUG] A=%v, D=%v, M(Memory[A])=%v, PC=%v(%v):NEXT_INST=%v\n",
+		"[DEBUG] A=%v, D=%v, M(Memory[A])=%v, PC=%v:NEXT_INST=%v\n",
 		cpu.a_reg.ToInt(),
 		cpu.d_reg.ToInt(),
-		cpu.memory.Pass(nil, OFF, cpu.a_reg.Pass(nil, OFF)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, cpu.a_reg.Pass(nil, OFF)).ToInt(),
 		cpu.pc_reg.ToInt(),
-		cpu.pc_reg.ToInt()-memory.PROGRAM_MEMORY_BASE,
-		cpu.memory.Pass(nil, OFF, cpu.pc_reg.Pass(nil, OFF)),
+		cpu.program_memory.Pass(nil, OFF, cpu.pc_reg.Pass(nil, OFF)),
 	)
 }
 
 func (cpu *Cpu) ShowDebugInfoForOperation(address *Bus, isCommandA *Bit, opsBus *Bus, destBus *Bus, jumpBus *Bus) {
-	log.Printf("[DEBUG]\t\t\t\t\t\tinst=%v => isCommandA=%v opsBus=%v, destBus=%v, jumpBus=%v\n",
+	log.Printf("[DEBUG]\t\t\t\t\tinst=%v => isCommandA=%v opsBus=%v, destBus=%v, jumpBus=%v\n",
 		address,
 		isCommandA,
 		[]*bit.Bit{opsBus.Bits[0], opsBus.Bits[1], opsBus.Bits[2], opsBus.Bits[3], opsBus.Bits[4], opsBus.Bits[5], opsBus.Bits[6]},

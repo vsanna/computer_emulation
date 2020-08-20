@@ -93,8 +93,8 @@ func (t *Translator) buildEnvironment() {
 		case *ast.AddressTaggingStatement:
 			if stmt.Value.Type == tokenizer.IDENT {
 				// symbol -> address of a line of program, so it should be more than or equal to memory.PROGRAM_MEMORY_BASE
-				log.Printf("stmt = %s, address = %d", stmt, memory.PROGRAM_MEMORY_BASE+stmt.LineNumber())
-				t.environment[stmt.Value.Literal] = memory.PROGRAM_MEMORY_BASE + stmt.LineNumber()
+				log.Printf("stmt = %s, address = %d", stmt, stmt.LineNumber())
+				t.environment[stmt.Value.Literal] = stmt.LineNumber()
 			}
 		case *ast.OpsAndJumpStatement:
 			// OpsAndJumpStatement cannot have IDENT in it.

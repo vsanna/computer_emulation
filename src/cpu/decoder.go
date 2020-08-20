@@ -24,7 +24,6 @@ func (decoder *Decoder) Pass(in *Bus) (
 	// 先頭1bitのみで決定
 	isCommandA = decoder.not.Pass(in.Bits[0])
 
-	// TODO: これ何に使うのか
 	address = NewBus(BusOption{
 		Bits: []int{
 			0,

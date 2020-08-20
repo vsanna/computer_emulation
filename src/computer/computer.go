@@ -13,17 +13,20 @@ import (
 
 // ≒ mother board(circuit basis)
 type Computer struct {
-	memory *memory.Memory
-	cpu    *cpu.Cpu
-	assm   *assembler.Assembler
+	data_memory    *memory.Memory
+	program_memory *memory.Memory // ROM
+	cpu            *cpu.Cpu
+	assm           *assembler.Assembler
 }
 
 func NewComputer() *Computer {
-	memory := memory.NewMemory()
+	data_memory := memory.NewMemory()
+	program_memory := memory.NewMemory()
 	computer := &Computer{
-		memory: memory,
-		cpu:    cpu.NewCpu(memory),
-		assm:   assembler.New(),
+		data_memory:    data_memory,
+		program_memory: program_memory,
+		cpu:            cpu.NewCpu(data_memory, program_memory),
+		assm:           assembler.New(),
 	}
 
 	return computer
@@ -34,28 +37,28 @@ func (computer *Computer) Run() {
 	// 1. place binary code in memory.
 	// the first line(memory[0]) is a booting process.
 	program := strings.TrimSpace(`
-0000010000000000
+0000000000010000
 1110111111001000
-0000010000000001
+0000000000010001
 1110101010001000
-0000010000000000
+0000000000010000
 1111110000010000
 0000000000000101
 1110010011010000
 0000000000010010
 1110001100000001
-0000010000000000
+0000000000010000
 1111110000010000
-0000010000000001
+0000000000010001
 1111000010001000
-0000010000000000
+0000000000010000
 1111110111001000
 0000000000000100
 1110101010000111
 0000000000010010
 1110101010000111
 `)
-	computer.memory.LoadExecutable(program)
+	computer.program_memory.LoadExecutable(program)
 
 	// 2. run
 	// use infinite loop instead of clock
@@ -75,7 +78,7 @@ func (computer *Computer) Run() {
 		// 3. update user output
 
 		// 4. for debugging:
-		time.Sleep(200 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
 
@@ -83,7 +86,7 @@ func (computer *Computer) Run() {
 // TODO: debugコードをflagで出し分け
 func (computer *Computer) ticktack(reset *Bit) {
 	computer.cpu.ShowDebugInfoForStatus()
-	cpuOutput, resetBit := computer.cpu.StartTicktack(reset)
-	memoryOutput := computer.memory.Pass(nil, OFF, cpuOutput)
-	computer.cpu.Pass(memoryOutput, resetBit)
+	pcAddress, resetBit := computer.cpu.StartTicktack(reset)
+	inst := computer.program_memory.Pass(nil, OFF, pcAddress)
+	computer.cpu.Pass(inst, resetBit)
 }
