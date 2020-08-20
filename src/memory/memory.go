@@ -47,6 +47,10 @@ const MEMORY_SIZE = 1024 * 64
 //
 const SYMBOL_ENV_BASE_ADDRESS = 16 //16
 
+// [16384, 16895](len = 512)
+const SCREEN_BASE_ADDRESS = 1024 * 16
+const SCREEN_UPPDER_ADDRESS = SCREEN_BASE_ADDRESS + 512 - 1
+
 type Memory struct {
 	words []*Word
 }
@@ -59,14 +63,14 @@ func NewMemory() *Memory {
 	return &Memory{words: words}
 }
 
-// load:1で新しい値に上書き(writeモード)
+// when load == ON, it's write mode.
 func (memory *Memory) Pass(in *Bus, load *Bit, address *Bus) *Bus {
 	// TODO: cheating here by using ToInt.. should replace this logic
 	addressInt := address.ToInt()
 	return memory.words[addressInt].Pass(in, load)
 }
 
-// NOTE: This simulates ROM by loading machine language program from text file.
+// This simulates ROM by loading machine language program from text file.
 func (memory *Memory) LoadExecutable(machine_lang_program string) {
 	lines := strings.Split(machine_lang_program, "\n")
 
