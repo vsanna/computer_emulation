@@ -51,6 +51,11 @@ func TestTokenizer_NextToken(t *testing.T) {
 	@R13
 	@R14
 	@R15
+	@4
+	@generated_ident__0bd71bf4_e3ab_11ea_9852_acde48001122_THEN
+	D;JEQ
+	@generated_ident__0bd71bf4_e3ab_11ea_9852_acde48001122_ELSE
+	0;JMP
 `
 	tokenizer := New(input)
 
@@ -155,6 +160,12 @@ func TestTokenizer_NextToken(t *testing.T) {
 		{AT, "@"}, {IDENT, "R13"},
 		{AT, "@"}, {IDENT, "R14"},
 		{AT, "@"}, {IDENT, "R15"},
+
+		{AT, "@"}, {IDENT, "generated_ident__0bd71bf4_e3ab_11ea_9852_acde48001122_THEN"},
+		{D_REG, "D"}, {SEMICOLON, ";"}, {JEQ, "JEQ"},
+
+		{AT, "@"}, {IDENT, "generated_ident__0bd71bf4_e3ab_11ea_9852_acde48001122_ELSE"},
+		{INT, "0"}, {SEMICOLON, ";"}, {JMP, "JMP"},
 
 		{EOF, ""},
 	}

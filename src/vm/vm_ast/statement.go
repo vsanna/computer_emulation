@@ -23,10 +23,10 @@ func NewPushStatement() *PushStatement {
 	}
 }
 
-func (a *PushStatement) statement() {
+func (a PushStatement) statement() {
 }
 
-func (a *PushStatement) String() string {
+func (a PushStatement) String() string {
 	result := vm_tokenizer.PUSH
 	if !a.Segment.IsZero() {
 		result += " " + a.Segment.Literal
@@ -35,7 +35,7 @@ func (a *PushStatement) String() string {
 	return result
 }
 
-func (a *PushStatement) LineNumber() int {
+func (a PushStatement) LineNumber() int {
 	return a.Line
 }
 
@@ -51,5 +51,125 @@ func (a AddStatement) String() string {
 }
 
 func (a AddStatement) LineNumber() int {
+	return a.Line
+}
+
+type SubStatement struct {
+	Line int
+}
+
+func (a SubStatement) statement() {
+}
+
+func (a SubStatement) String() string {
+	return vm_tokenizer.SUB
+}
+
+func (a SubStatement) LineNumber() int {
+	return a.Line
+}
+
+type NeqStatement struct {
+	Line int
+}
+
+func (a NeqStatement) statement() {
+}
+
+func (a NeqStatement) String() string {
+	return vm_tokenizer.NEG
+}
+
+func (a NeqStatement) LineNumber() int {
+	return a.Line
+}
+
+type EqStatement struct {
+	Line int
+}
+
+func (a EqStatement) statement() {
+}
+
+func (a EqStatement) String() string {
+	return vm_tokenizer.EQ
+}
+
+func (a EqStatement) LineNumber() int {
+	return a.Line
+}
+
+type GtStatement struct {
+	Line int
+}
+
+func (a GtStatement) statement() {
+}
+
+func (a GtStatement) String() string {
+	return vm_tokenizer.GT
+}
+
+func (a GtStatement) LineNumber() int {
+	return a.Line
+}
+
+type LtStatement struct {
+	Line int
+}
+
+func (a LtStatement) statement() {
+}
+
+func (a LtStatement) String() string {
+	return vm_tokenizer.LT
+}
+
+func (a LtStatement) LineNumber() int {
+	return a.Line
+}
+
+type AndStatement struct {
+	Line int
+}
+
+func (a AndStatement) statement() {
+}
+
+func (a AndStatement) String() string {
+	return vm_tokenizer.AND
+}
+
+func (a AndStatement) LineNumber() int {
+	return a.Line
+}
+
+type OrStatement struct {
+	Line int
+}
+
+func (a OrStatement) statement() {
+}
+
+func (a OrStatement) String() string {
+	return vm_tokenizer.OR
+}
+
+func (a OrStatement) LineNumber() int {
+	return a.Line
+}
+
+type NotStatement struct {
+	Line int
+}
+
+func (a NotStatement) statement() {
+}
+
+func (a NotStatement) String() string {
+	return vm_tokenizer.NOT
+}
+
+func (a NotStatement) LineNumber() int {
 	return a.Line
 }

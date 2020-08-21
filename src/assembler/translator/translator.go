@@ -174,11 +174,11 @@ func (t *Translator) translateOpsAndJumpStatement(stmt *ast.OpsAndJumpStatement)
 			case "1":
 				compBits = []int{1, 1, 1, 1, 1, 1}
 			default:
-				log.Fatalf("invalid comp")
+				log.Fatalf("invalid comp. comp size 1 and Value is int, but not 0 or 1. actual = %q", stmt.Comp[0].Literal)
 				os.Exit(1)
 			}
 		default:
-			log.Fatalf("invalid comp")
+			log.Fatalf("invalid comp. comp size 1 but Value is not A nor D nor M nor int. int, actual = %q", stmt.Comp[0].Type)
 			os.Exit(1)
 		}
 	case 2:
@@ -198,7 +198,7 @@ func (t *Translator) translateOpsAndJumpStatement(stmt *ast.OpsAndJumpStatement)
 				aBit = 0
 				compBits = []int{1, 1, 1, 0, 1, 0}
 			default:
-				log.Fatalf("invalid comp")
+				log.Fatalf("invalid comp. comp size is 2 and MINUS is the head, but trailing value is unexpected one. actual=%q", stmt.Comp[0].Literal)
 				os.Exit(1)
 			}
 		case tokenizer.BANG:
@@ -213,11 +213,13 @@ func (t *Translator) translateOpsAndJumpStatement(stmt *ast.OpsAndJumpStatement)
 				aBit = 1
 				compBits = []int{1, 1, 0, 0, 0, 1}
 			default:
-				log.Fatalf("invalid comp")
+				log.Fatalf("invalid comp. comp size is 2 and BANG is the head, but trailing value is unexpected one. actual=%q", stmt.Comp[1].Literal)
 				os.Exit(1)
 			}
 		default:
-			log.Fatalf("invalid comp")
+			log.Printf("stmt = %q", stmt)
+			log.Printf("stmt.Comp = %q", stmt.Comp)
+			log.Fatalf("invalid comp. comp size is 2 but the head is not BANG nor MINUS. actual=%q", stmt.Comp[1].Literal)
 			os.Exit(1)
 		}
 	case 3:

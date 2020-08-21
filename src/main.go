@@ -24,7 +24,7 @@ func runMachine() {
 func asmToMachineCode() {
 	filename := ""
 	if len(os.Args) == 1 {
-		filename = "./sample_asm/vm_output.asm"
+		filename = "./sample_asm/all_ops.asm"
 	} else {
 		filename = os.Args[1]
 	}
@@ -46,7 +46,7 @@ func asmToMachineCode() {
 func vmToAsm() {
 	filename := ""
 	if len(os.Args) == 1 {
-		filename = "./sample_vm/add_push.vm"
+		filename = "./sample_vm/all_ops.vm"
 	} else {
 		filename = os.Args[1]
 	}

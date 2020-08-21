@@ -9,6 +9,24 @@ func TestTokenizer_NextToken(t *testing.T) {
 push constant 2
 push constant 3
 add
+
+push static 0
+push local 0
+push argument 0
+push this 0
+push that 0
+push pointer 0
+push temp 0
+push constant 0
+
+sub
+not
+and
+or
+eq
+neg
+gt
+lt
 `
 	tokenizer := New(input)
 
@@ -23,6 +41,25 @@ add
 		{CONSTANT, "constant"},
 		{INT, "3"},
 		{ADD, "add"},
+
+		{PUSH, "push"}, {STATIC, "static"}, {INT, "0"},
+		{PUSH, "push"}, {LOCAL, "local"}, {INT, "0"},
+		{PUSH, "push"}, {ARGUMENT, "argument"}, {INT, "0"},
+		{PUSH, "push"}, {THIS, "this"}, {INT, "0"},
+		{PUSH, "push"}, {THAT, "that"}, {INT, "0"},
+		{PUSH, "push"}, {POINTER, "pointer"}, {INT, "0"},
+		{PUSH, "push"}, {TEMP, "temp"}, {INT, "0"},
+		{PUSH, "push"}, {CONSTANT, "constant"}, {INT, "0"},
+
+		{SUB, "sub"},
+		{NOT, "not"},
+		{AND, "and"},
+		{OR, "or"},
+		{EQ, "eq"},
+		{NEG, "neg"},
+		{GT, "gt"},
+		{LT, "lt"},
+
 		{EOF, ""},
 	}
 

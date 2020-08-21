@@ -24,30 +24,46 @@ const (
 	//POP  = "POP"
 
 	ADD = "ADD"
-	//SUB = "SUB"
-	//
-	//NEQ = "NEQ"
-	//EQ = "EQ"
-	//GT = "GT"
-	//LT = "LT"
-	//AND = "AND"
-	//OR = "OR"
-	//NOT = "NOT"
+	SUB = "SUB"
+
+	EQ  = "EQ"
+	GT  = "GT"
+	LT  = "LT"
+	AND = "AND"
+	OR  = "OR"
+
+	NOT = "NOT"
+	NEG = "NEG"
 
 	CONSTANT = "CONSTANT"
-	//LOCAL = "LOCAL"
-	//ARGUMENT = "ARGUMENT"
-	//THIS = "THIS"
-	//THAT = "THAT"
-	//POINTER = "POINTER"
-	//TEMP = "TEMP"
-	//STATIC = "STATIC"
+	LOCAL    = "LOCAL"
+	ARGUMENT = "ARGUMENT"
+	THIS     = "THIS"
+	THAT     = "THAT"
+	POINTER  = "POINTER"
+	TEMP     = "TEMP"
+	STATIC   = "STATIC"
 )
 
 var keywords = map[string]TokenType{
 	"push":     PUSH,
 	"add":      ADD,
+	"sub":      SUB,
+	"and":      AND,
+	"or":       OR,
+	"not":      NOT,
+	"neg":      NEG,
+	"eq":       EQ,
+	"gt":       GT,
+	"lt":       LT,
 	"constant": CONSTANT,
+	"argument": ARGUMENT,
+	"local":    LOCAL,
+	"this":     THIS,
+	"that":     THAT,
+	"temp":     TEMP,
+	"static":   STATIC,
+	"pointer":  POINTER,
 }
 
 func LookupIdent(ident string) TokenType {

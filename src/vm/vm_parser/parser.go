@@ -63,24 +63,10 @@ func (p *Parser) parseStatement() vm_ast.Statement {
 		return p.parsePushStatement()
 	//case vm_tokenizer.POP:
 	//	return p.parsePopStatement()
-	case vm_tokenizer.ADD:
-		return p.parseAddStatement()
-	//case vm_tokenizer.SUB:
-	//	return p.parseSubStatement()
-	//case vm_tokenizer.EQ:
-	//	return p.parseEqStatement()
-	//case vm_tokenizer.NEQ:
-	//	return p.parseNeqStatement()
-	//case vm_tokenizer.GT:
-	//	return p.parseGtStatement()
-	//case vm_tokenizer.LT:
-	//	return p.parseLtStatement()
-	//case vm_tokenizer.NOT:
-	//	return p.parseNotStatement()
-	//case vm_tokenizer.AND:
-	//	return p.parseAndStatement()
-	//case vm_tokenizer.OR:
-	//	return p.parseOrStatement()
+	case vm_tokenizer.ADD, vm_tokenizer.SUB,
+		vm_tokenizer.AND, vm_tokenizer.OR, vm_tokenizer.NOT,
+		vm_tokenizer.EQ, vm_tokenizer.NEG, vm_tokenizer.GT, vm_tokenizer.LT:
+		return p.parseArithmeticLogicalStatement()
 	//case vm_tokenizer.LABEL:
 	//	return p.parseLabelStatement()
 	//case vm_tokenizer.GOTO:
@@ -101,7 +87,17 @@ func (p *Parser) parseStatement() vm_ast.Statement {
 func (p *Parser) parsePushStatement() vm_ast.Statement {
 	statement := vm_ast.NewPushStatement()
 
-	if !(p.peekTokenIs(vm_tokenizer.IDENT) || p.peekTokenIs(vm_tokenizer.INT) || p.peekTokenIs(vm_tokenizer.CONSTANT)) {
+	if !(p.peekTokenIs(vm_tokenizer.IDENT) ||
+		p.peekTokenIs(vm_tokenizer.INT) ||
+		p.peekTokenIs(vm_tokenizer.CONSTANT) ||
+		p.peekTokenIs(vm_tokenizer.ARGUMENT) ||
+		p.peekTokenIs(vm_tokenizer.LOCAL) ||
+		p.peekTokenIs(vm_tokenizer.STATIC) ||
+		p.peekTokenIs(vm_tokenizer.THIS) ||
+		p.peekTokenIs(vm_tokenizer.THAT) ||
+		p.peekTokenIs(vm_tokenizer.POINTER) ||
+		p.peekTokenIs(vm_tokenizer.TEMP) ||
+		p.peekTokenIs(vm_tokenizer.POINTER)) {
 		p.addError(fmt.Sprintf("unexpected token. actual=%q", p.currentToken.Type))
 		log.Error("parse error")
 		os.Exit(1)
@@ -147,11 +143,32 @@ func (p *Parser) peekTokenIs(tt vm_tokenizer.TokenType) bool {
 	return p.peekToken.Type == tt
 }
 
-func (p *Parser) parseAddStatement() vm_ast.Statement {
+func (p *Parser) parseArithmeticLogicalStatement() vm_ast.Statement {
 	// be in [add]
-	statement := &vm_ast.AddStatement{}
+	var statement vm_ast.Statement
+	switch p.currentToken.Type {
+	case vm_tokenizer.ADD:
+		statement = &vm_ast.AddStatement{Line: p.currentLine}
+	case vm_tokenizer.SUB:
+		statement = &vm_ast.SubStatement{Line: p.currentLine}
+	case vm_tokenizer.AND:
+		statement = &vm_ast.AndStatement{Line: p.currentLine}
+	case vm_tokenizer.OR:
+		statement = &vm_ast.OrStatement{Line: p.currentLine}
 
-	statement.Line = p.currentLine
+	case vm_tokenizer.EQ:
+		statement = &vm_ast.EqStatement{Line: p.currentLine}
+	case vm_tokenizer.GT:
+		statement = &vm_ast.GtStatement{Line: p.currentLine}
+	case vm_tokenizer.LT:
+		statement = &vm_ast.LtStatement{Line: p.currentLine}
+
+	case vm_tokenizer.NOT:
+		statement = &vm_ast.NotStatement{Line: p.currentLine}
+	case vm_tokenizer.NEG:
+		statement = &vm_ast.NeqStatement{Line: p.currentLine}
+	}
+
 	p.currentLine += 1
 
 	p.nextToken()

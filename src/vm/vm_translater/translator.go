@@ -4,7 +4,7 @@ import (
 	"computer_emulation/src/memory"
 	"computer_emulation/src/vm/vm_ast"
 	"computer_emulation/src/vm/vm_tokenizer"
-	"fmt"
+	"github.com/google/uuid"
 	"log"
 	"os"
 	"strconv"
@@ -17,6 +17,9 @@ type Translator struct {
 	currentTextAreaLine int
 }
 
+const TRUE = "1"
+const FALSE = "0"
+
 func New(program *vm_ast.Program) *Translator {
 	return &Translator{
 		program:             program,
@@ -25,10 +28,6 @@ func New(program *vm_ast.Program) *Translator {
 	}
 }
 
-/*
-sample output
-add 1 2
-*/
 func (t *Translator) Translate() string {
 	// 1. build environment map
 	t.buildEnvironment()
@@ -43,7 +42,8 @@ func (t *Translator) Translate() string {
 			result += translatedStatement + "\n"
 		}
 	}
-	fmt.Printf("%s\n", result)
+	result += result + t.predefinedTrailingStatement()
+
 	return strings.TrimSpace(result)
 }
 
@@ -51,30 +51,21 @@ func (t *Translator) translateStatement(statement vm_ast.Statement) []string {
 	switch stmt := statement.(type) {
 	case *vm_ast.PushStatement:
 		return t.translatePushStatement(stmt)
-	case *vm_ast.AddStatement:
-		return t.translateAddStatement(stmt)
+	//case *vm_ast.PopStatement:
+	//	return t.translatePopStatement(stmt)
+	case *vm_ast.AddStatement, *vm_ast.SubStatement, *vm_ast.AndStatement, *vm_ast.OrStatement:
+		return t.translateBinaryOperationStatement(stmt)
+	case *vm_ast.EqStatement, *vm_ast.GtStatement, *vm_ast.LtStatement:
+		return t.translateCompOperationStatement(stmt)
+	case *vm_ast.NotStatement:
+		return t.translateNotStatement(stmt)
+	case *vm_ast.NeqStatement:
+		return t.translateNeqStatement(stmt)
 	default:
 		log.Fatalf("unknown statement has come")
 		os.Exit(1)
 	}
 	return []string{}
-}
-
-func (t *Translator) buildEnvironment() {
-	for _, statement := range t.program.Statements {
-		switch stmt := statement.(type) {
-		case *vm_ast.PushStatement:
-			if stmt.Value.Type == vm_tokenizer.IDENT {
-				if _, ok := t.environment[stmt.Value.Literal]; !ok {
-					t.environment[stmt.Value.Literal] = memory.SYMBOL_ENV_BASE_ADDRESS + t.currentTextAreaLine
-					log.Printf("%s is placed in an address(%d)", stmt.Value.Literal, t.environment[stmt.Value.Literal])
-					t.currentTextAreaLine += 1
-				}
-			}
-		case *vm_ast.AddStatement:
-			// noop
-		}
-	}
 }
 
 func (t *Translator) translatePushStatement(stmt *vm_ast.PushStatement) []string {
@@ -149,54 +140,182 @@ func (t *Translator) translatePushStatement(stmt *vm_ast.PushStatement) []string
 		if len(trimmedLine) == 0 {
 			continue
 		}
-		fmt.Printf("%s\n", trimmedLine)
 		result = append(result, trimmedLine)
 	}
 	return result
 }
 
-func (t *Translator) translateAddStatement(stmt *vm_ast.AddStatement) []string {
-	return []string{
-		// SP is always 0
+func (t *Translator) translateBinaryOperationStatement(stmt vm_ast.Statement) []string {
+	operationLine := ""
 
-		// M[SP] = M[SP] - 1
-		"@SP",
+	switch stmt.(type) {
+	case *vm_ast.AddStatement:
+		operationLine = "D=D+M;"
+	case *vm_ast.SubStatement:
+		operationLine = "D=D-M;"
+	case *vm_ast.AndStatement:
+		operationLine = "D=D&M;"
+	case *vm_ast.OrStatement:
+		operationLine = "D=D|M;"
+	}
+
+	result := []string{}
+
+	// R5 = pop()
+	result = append(result, t.popAndSetToStatements("R5")...)
+	// R6 = pop()
+	result = append(result, t.popAndSetToStatements("R6")...)
+	// ops(R5, R6)
+	result = append(result, []string{
+		"@R6",
 		"D=M;",
-		"M=D-1;",
+		"@R5",         // NOTE: it's "stack"! so, R6 is a value on top of the stack and R5 is a value below that.
+		operationLine, // ex "D=D+M;"
+	}...)
+	// push D to stack
+	result = append(result, t.pushDregStatements()...)
 
-		// R5 = M[SP]
-		"@SP",
-		"A=M;",
+	return result
+}
+
+func (t *Translator) translateCompOperationStatement(stmt vm_ast.Statement) []string {
+	compMethod := ""
+	switch stmt.(type) {
+	case *vm_ast.EqStatement:
+		compMethod = "JEQ"
+	case *vm_ast.GtStatement:
+		compMethod = "JGT"
+	case *vm_ast.LtStatement:
+		compMethod = "JLT"
+	}
+
+	result := []string{}
+
+	// R5 = pop()
+	result = append(result, t.popAndSetToStatements("R5")...)
+	// R6 = pop()
+	result = append(result, t.popAndSetToStatements("R6")...)
+	// set R5-R6 in D
+	result = append(result, []string{
+		"@R6",
 		"D=M;",
 		"@R5",
-		"M=D;",
+		"D=D-M;",
+	}...)
 
-		// M[M[SP]] = 0
-		"@SP",
-		"A=M;",
-		"M=0;",
+	keyString := generateUuidForIdent()
 
-		// M[SP] = M[SP] - 1
-		"@SP",
-		"D=M;",
-		"M=D-1;",
+	// IF logic
+	ifLogic := []string{
+		"@" + keyString + "_THEN",
+		"D;" + compMethod,
+		"@" + keyString + "_ELSE",
+		"0;JMP",
+	}
 
-		// D = R5 + M[M[SP]]
-		"@SP",
-		"A=M;",
-		"D=M;",
+	// true section
+	trueSection := append([]string{
+		"(" + keyString + "_THEN)",
+		"@" + TRUE,
+		"D=A;",
+	}, t.pushDregStatements()...)
+	trueSection = append(trueSection, []string{
+		"@" + keyString + "_END",
+		"0;JMP",
+	}...)
+
+	// false section
+	falseSection := append([]string{
+		"(" + keyString + "_ELSE)",
+		"@" + FALSE,
+		"D=A;",
+	}, t.pushDregStatements()...)
+	falseSection = append(falseSection, []string{
+		"@" + keyString + "_END",
+		"0;JMP",
+	}...)
+
+	result = append(result, ifLogic...)
+	result = append(result, trueSection...)
+	result = append(result, falseSection...)
+	result = append(result, "("+keyString+"_END)")
+
+	return result
+}
+
+func (t *Translator) translateNotStatement(stmt vm_ast.Statement) []string {
+	result := []string{}
+
+	keyString := generateUuidForIdent()
+
+	// pop and set the top value in M[R5]
+	result = append(result, t.popAndSetToStatements("R5")...)
+
+	// set M[R5] in D
+	result = append(result, []string{
 		"@R5",
-		"D=D+M;",
+		"D=M-1;",
+		"@" + keyString + "_THEN",
+		"D;JEQ", // Dが0 <=> Mが1 <=> R5には1が入っている <=> 0をpushする
+		"@" + keyString + "_ELSE",
+		"0;JMP", // Dが0 <=> Mが1 <=> R5には1が入っている <=> 0をpushする
+	}...)
 
-		// M[M[SP]] = D
-		"@SP",
-		"A=M;",
-		"M=D;",
+	// true section
+	trueSection := append([]string{
+		"(" + keyString + "_THEN)",
+		"@" + FALSE,
+		"D=A;",
+	}, t.pushDregStatements()...)
+	trueSection = append(trueSection, []string{
+		"@" + keyString + "_END",
+		"0;JMP",
+	}...)
 
-		// SP = SP + 1
-		"@SP",
-		"D=M;",
-		"M=D+1;",
+	// false section
+	falseSection := append([]string{
+		"(" + keyString + "_ELSE)",
+		"@" + TRUE,
+		"D=A;",
+	}, t.pushDregStatements()...)
+	falseSection = append(falseSection, []string{
+		"@" + keyString + "_END",
+		"0;JMP",
+	}...)
+
+	result = append(result, trueSection...)
+	result = append(result, falseSection...)
+	result = append(result, "("+keyString+"_END)")
+
+	return result
+}
+
+func (t *Translator) translateNeqStatement(stmt vm_ast.Statement) []string {
+	result := t.popAndSetToStatements("R5")
+	result = append(result, []string{
+		"D=0;",
+		"@R5",
+		"M=A;",
+		"D=D-M;",
+	}...)
+	result = append(result, t.pushDregStatements()...)
+	return result
+}
+
+func (t *Translator) buildEnvironment() {
+	for _, statement := range t.program.Statements {
+		switch stmt := statement.(type) {
+		case *vm_ast.PushStatement:
+			if stmt.Value.Type == vm_tokenizer.IDENT {
+				if _, ok := t.environment[stmt.Value.Literal]; !ok {
+					t.environment[stmt.Value.Literal] = memory.SYMBOL_ENV_BASE_ADDRESS + t.currentTextAreaLine
+					log.Printf("%s is placed in an address(%d)", stmt.Value.Literal, t.environment[stmt.Value.Literal])
+					t.currentTextAreaLine += 1
+				}
+			}
+		case *vm_ast.AddStatement:
+			// noop
+		}
 	}
 }
 
@@ -210,23 +329,50 @@ func (t *Translator) predefinedSetupStatement() string {
 	}, "\n") + "\n"
 }
 
-//
-//// A command: 0 v v v v v v v v v v v v v v v
-//func (t *Translator) translateAllocationStatement(stmt *vm_ast.AllocationStatement) string {
-//	if stmt.Value.Type == tokenizer.IDENT {
-//		// NOTE. env table are placed in DATA_MEMORY_BASE + 16~
-//		// envから値をとってきてbinaryにして放り込み
-//		address := t.environment[stmt.Value.Literal]
-//		binaryString := intToBinaryString(address)
-//		log.Printf("the address of %s is %d. binaryString is %s", stmt.Value.Literal, address, binaryString)
-//		return binaryString
-//	} else {
-//		address, err := strconv.Atoi(stmt.Value.Literal)
-//		if err != nil {
-//			log.Fatalf("invalid combination of literal and tokentype")
-//			os.Exit(1)
-//		}
-//		return intToBinaryString(address)
-//	}
-//}
-//
+func (t *Translator) predefinedTrailingStatement() string {
+	return strings.Join([]string{
+		"(VM_END)",
+		"@VM_END",
+		"0;JMP",
+	}, "\n") + "\n"
+}
+
+func (t *Translator) popAndSetToStatements(registerName string) []string {
+	return []string{
+		////  {registerName} = pop()
+		// M[SP] = M[SP] - 1
+		"@SP",
+		"D=M;",
+		"M=D-1;",
+		// {registerName} = M[SP]
+		"@SP",
+		"A=M;",
+		"D=M;",
+		"@" + registerName,
+		"M=D;",
+		// M[M[SP]] = 0
+		"@SP",
+		"A=M;",
+		"M=0;",
+	}
+}
+
+func (t *Translator) pushDregStatements() []string {
+	return []string{
+		// M[M[SP]] = D
+		"@SP",
+		"A=M;",
+		"M=D;",
+		// SP = SP + 1
+		"@SP",
+		"D=M;",
+		"M=D+1;",
+	}
+}
+
+// uuid that can be used as ident must start with alphabet
+func generateUuidForIdent() string {
+	key, _ := uuid.NewUUID()
+	keyString := strings.ReplaceAll(key.String(), "-", "_")
+	return "generated_ident__" + keyString
+}

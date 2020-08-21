@@ -1,0 +1,33 @@
+push constant 2
+push constant 4
+add
+push constant 5
+sub
+not
+push constant 10
+push constant 10
+eq
+push constant 10
+push constant 10
+gt
+push constant 10
+push constant 10
+lt
+push constant 10
+push constant 5
+eq
+push constant 10
+push constant 5
+gt
+push constant 10
+push constant 5
+lt
+push constant 5
+push constant 10
+eq
+push constant 5
+push constant 10
+gt
+push constant 5
+push constant 10
+lt

@@ -9,15 +9,34 @@ import (
 
 func TestParser_ParseProgram_LineNumber(t *testing.T) {
 	input := `
-push constant 1
 push constant 2
+push constant 3
 add
+push static 0
+push local 0
+push argument 0
+push this 0
+push that 0
+push pointer 0
+push temp 0
+push constant 0
+sub
+not
+and
+or
+eq
+neg
+gt
+lt
 `
 	t2 := vm_tokenizer.New(input)
 	parser := New(t2)
 	program := parser.ParseProgram()
-	if len(program.Statements) != 3 {
-		t.Fatalf("program.Statements doesn't have 25 statements. got=%d", len(program.Statements))
+
+	expectedLineNum := 19
+
+	if len(program.Statements) != expectedLineNum {
+		t.Fatalf("program.Statements doesn't have %d statements. got=%d", expectedLineNum, len(program.Statements))
 	}
 
 	tests := []struct {
@@ -26,6 +45,22 @@ add
 		{expectedLineNumber: 0},
 		{expectedLineNumber: 1},
 		{expectedLineNumber: 2},
+		{expectedLineNumber: 3},
+		{expectedLineNumber: 4},
+		{expectedLineNumber: 5},
+		{expectedLineNumber: 6},
+		{expectedLineNumber: 7},
+		{expectedLineNumber: 8},
+		{expectedLineNumber: 9},
+		{expectedLineNumber: 10},
+		{expectedLineNumber: 11},
+		{expectedLineNumber: 12},
+		{expectedLineNumber: 13},
+		{expectedLineNumber: 14},
+		{expectedLineNumber: 15},
+		{expectedLineNumber: 16},
+		{expectedLineNumber: 17},
+		{expectedLineNumber: 18},
 	}
 
 	for i, statement := range program.Statements {
@@ -77,28 +112,42 @@ func TestParser_ParseProgram_PushStatement(t *testing.T) {
 	}
 }
 
-func TestParser_ParseProgram_AddStatement(t *testing.T) {
-	tokenizer := vm_tokenizer.New("add")
-	parser := New(tokenizer)
-	program := parser.ParseProgram()
+func TestParser_parseArithmeticStatement(t *testing.T) {
+	tests := []struct {
+		input           string
+		expectedLiteral string
+	}{
+		{"add", "ADD"},
+		{"sub", "SUB"},
+		{"and", "AND"},
+		{"or", "OR"},
 
-	if len(parser.Errors()) > 0 {
-		t.Fatal("program.Statements has errors.\n" + strings.Join(parser.Errors(), "\n"))
+		{"eq", "EQ"},
+		{"gt", "GT"},
+		{"lt", "LT"},
+
+		{"not", "NOT"},
+		{"neg", "NEG"},
 	}
 
-	if len(program.Statements) != 1 {
-		t.Fatalf("program.Statements has more than 1 statement. got=%d", len(program.Statements))
+	for i, test := range tests {
+		tokenizer := vm_tokenizer.New(test.input)
+		parser := New(tokenizer)
+		program := parser.ParseProgram()
+
+		if len(parser.Errors()) > 0 {
+			t.Fatalf("[%d] program.Statements has errors.\n"+strings.Join(parser.Errors(), "\n"), i)
+		}
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("[%d] program.Statements has more than 1 statement. got=%d", i, len(program.Statements))
+		}
+
+		statement := program.Statements[0]
+
+		if statement.String() != test.expectedLiteral {
+			t.Fatalf("[%d] statement.String() is wrong. expected = %q, actual = %q", i, "ADD", statement.String())
+		}
 	}
 
-	statement := program.Statements[0]
-
-	if statement.String() != "ADD" {
-		t.Fatalf("statement.String() is wrong. expected = %q, actual = %q", "ADD", statement.String())
-	}
-
-	_, ok := statement.(*vm_ast.AddStatement)
-
-	if !ok {
-		t.Fatalf("failed to convert from Statement to AllocationStatement. actual=%T", statement)
-	}
 }
