@@ -56,7 +56,7 @@ func (cpu *Cpu) StartTicktack(reset *Bit) (*Bus, *Bit) {
 func (cpu *Cpu) Pass(in *Bus, resetBit *Bit) {
 	// 1. decode
 	isCommandA, address, opsBus, destBus, jumpBus := cpu.decode(in)
-	cpu.ShowDebugInfoForOperation(address, isCommandA, opsBus, destBus, jumpBus)
+	//cpu.ShowDebugInfoForOperation(address, isCommandA, opsBus, destBus, jumpBus)
 
 	// 2-1. commandA: update A register
 	cpu.a_reg.Pass(address, isCommandA)
@@ -119,10 +119,22 @@ func (cpu *Cpu) ShowDebugInfoForStatus() {
 		cpu.pc_reg.ToInt(),
 		cpu.program_memory.Pass(nil, OFF, cpu.pc_reg.Pass(nil, OFF)),
 	)
+	cpu.ShowDebugInfoForGlobalStack()
+}
+
+func (cpu *Cpu) ShowDebugInfoForGlobalStack() {
+	globalStack := []int{}
+	start := memory.GLOBAL_STACK_BASE_ADDRESS
+	end := cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.SP_WORD_ADDRESS)).ToInt()
+	for i := start; i <= end; i++ {
+		globalStack = append(globalStack, cpu.data_memory.Pass(nil, OFF, bit.IntToBus(i)).ToInt())
+	}
+	// NOTE: least pos is always 0 since it's where new val will come in.
+	log.Printf("[DEBUG] GlobalStack = %v", start, end, globalStack)
 }
 
 func (cpu *Cpu) ShowDebugInfoForOperation(address *Bus, isCommandA *Bit, opsBus *Bus, destBus *Bus, jumpBus *Bus) {
-	log.Printf("[DEBUG]\t\t\t\t\tinst=%v => isCommandA=%v opsBus=%v, destBus=%v, jumpBus=%v\n",
+	log.Printf("[DEBUG] inst=%v => isCommandA=%v opsBus=%v, destBus=%v, jumpBus=%v\n",
 		address,
 		isCommandA,
 		[]*bit.Bit{opsBus.Bits[0], opsBus.Bits[1], opsBus.Bits[2], opsBus.Bits[3], opsBus.Bits[4], opsBus.Bits[5], opsBus.Bits[6]},

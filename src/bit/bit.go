@@ -105,3 +105,20 @@ func (bus *Bus) ToInt() int {
 
 	return n
 }
+
+func IntToBus(i int) *Bus {
+	if i >= 1024*128 {
+		panic("too large")
+	}
+	result := NewBus(BusOption{Bits: []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}})
+
+	pos := 0
+	for i > 0 {
+		lsb := i & 1
+		result.Bits[BUS_WIDTH-1-pos] = ToBit(lsb)
+		i = i >> 1
+		pos += 1
+	}
+
+	return result
+}

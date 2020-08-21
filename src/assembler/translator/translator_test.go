@@ -15,6 +15,27 @@ func TestTranslator_Translate(t1 *testing.T) {
 	M=0;
 	D;JMP
 	ADM=D&M;JNE
+	@SP
+	@LCL
+	@ARG
+	@THIS
+	@THAT
+	@R0
+	@R1
+	@R2
+	@R3
+	@R4
+	@R5
+	@R6
+	@R7
+	@R8
+	@R9
+	@R10
+	@R11
+	@R12
+	@R13
+	@R14
+	@R15
 `
 	t2 := tokenizer.New(input)
 	p := parser.New(t2)
@@ -29,7 +50,29 @@ func TestTranslator_Translate(t1 *testing.T) {
 		{expectedLine: "1110101010001000"}, // 111 0 101010 001 000
 		{expectedLine: "1110001100000111"}, // 111 0 001100 000 111
 		{expectedLine: "1111000000111101"}, // 111 1 000000 111 101
-		// 1110011000000111
+
+		{expectedLine: "0000000000000000"},
+		{expectedLine: "0000000000000001"},
+		{expectedLine: "0000000000000010"},
+		{expectedLine: "0000000000000011"},
+		{expectedLine: "0000000000000100"},
+
+		{expectedLine: "0000000000000000"},
+		{expectedLine: "0000000000000001"},
+		{expectedLine: "0000000000000010"},
+		{expectedLine: "0000000000000011"},
+		{expectedLine: "0000000000000100"},
+		{expectedLine: "0000000000000101"},
+		{expectedLine: "0000000000000110"},
+		{expectedLine: "0000000000000111"},
+		{expectedLine: "0000000000001000"},
+		{expectedLine: "0000000000001001"},
+		{expectedLine: "0000000000001010"},
+		{expectedLine: "0000000000001011"},
+		{expectedLine: "0000000000001100"},
+		{expectedLine: "0000000000001101"},
+		{expectedLine: "0000000000001110"},
+		{expectedLine: "0000000000001111"},
 	}
 
 	translator := New(program)
@@ -51,7 +94,6 @@ func Test_intSliceToString(t *testing.T) {
 		args args
 		want string
 	}{
-		// TODO: Add test cases.
 		{"test", args{bits: []int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}, "0000000000000000"},
 		{"test", args{bits: []int{0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0}}, "0101010101010100"},
 	}
@@ -73,7 +115,6 @@ func Test_intToBinaryString(t *testing.T) {
 		args args
 		want string
 	}{
-		// TODO: Add test cases.
 		{"test", args{address: 0}, "0000000000000000"},
 		{"test", args{address: 5}, "0000000000000101"},
 		{"test", args{address: 31}, "0000000000011111"},

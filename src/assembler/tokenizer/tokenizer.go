@@ -157,8 +157,8 @@ func (l *Tokenizer) peekChar(pos int) byte {
 
 func (l *Tokenizer) readIdentifier() string {
 	position := l.position
-	// 英字のみからなる文字列を読み進める
-	for isLetter(l.ch) {
+	// 英数字のみからなる文字列を読み進める
+	for isLetter(l.ch) || isDigit(l.ch) {
 		l.readChar()
 	}
 	return l.input[position:l.position]

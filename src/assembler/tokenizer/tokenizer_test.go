@@ -30,6 +30,27 @@ func TestTokenizer_NextToken(t *testing.T) {
 	0;JMP
 	@DMAN
 	@ADMA
+	@SP
+	@LCL
+	@ARG
+	@THIS
+	@THAT
+	@R0
+	@R1
+	@R2
+	@R3
+	@R4
+	@R5
+	@R6
+	@R7
+	@R8
+	@R9
+	@R10
+	@R11
+	@R12
+	@R13
+	@R14
+	@R15
 `
 	tokenizer := New(input)
 
@@ -113,12 +134,33 @@ func TestTokenizer_NextToken(t *testing.T) {
 		{AT, "@"},
 		{IDENT, "ADMA"},
 
+		{AT, "@"}, {IDENT, "SP"},
+		{AT, "@"}, {IDENT, "LCL"},
+		{AT, "@"}, {IDENT, "ARG"},
+		{AT, "@"}, {IDENT, "THIS"},
+		{AT, "@"}, {IDENT, "THAT"},
+		{AT, "@"}, {IDENT, "R0"},
+		{AT, "@"}, {IDENT, "R1"},
+		{AT, "@"}, {IDENT, "R2"},
+		{AT, "@"}, {IDENT, "R3"},
+		{AT, "@"}, {IDENT, "R4"},
+		{AT, "@"}, {IDENT, "R5"},
+		{AT, "@"}, {IDENT, "R6"},
+		{AT, "@"}, {IDENT, "R7"},
+		{AT, "@"}, {IDENT, "R8"},
+		{AT, "@"}, {IDENT, "R9"},
+		{AT, "@"}, {IDENT, "R10"},
+		{AT, "@"}, {IDENT, "R11"},
+		{AT, "@"}, {IDENT, "R12"},
+		{AT, "@"}, {IDENT, "R13"},
+		{AT, "@"}, {IDENT, "R14"},
+		{AT, "@"}, {IDENT, "R15"},
+
 		{EOF, ""},
 	}
 
 	for i, tt := range tests {
 		tok := tokenizer.NextToken()
-
 		if tok.Literal != tt.expectedLiteral {
 			t.Fatalf("tests[%d] - tokenLiteral is wrong. expected: %q, actual: %q", i, tt.expectedLiteral, tok.Literal)
 		}
