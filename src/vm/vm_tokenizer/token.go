@@ -41,10 +41,14 @@ const (
 	ARGUMENT = "ARGUMENT"
 	THIS     = "THIS"
 	THAT     = "THAT"
-	POINTER  = "POINTER"
 	// static
-	TEMP   = "TEMP"
-	STATIC = "STATIC"
+	POINTER = "POINTER"
+	TEMP    = "TEMP"
+	STATIC  = "STATIC"
+
+	LABEL  = "LABEL"
+	GOTO   = "GOTO"
+	IFGOTO = "IFGOTO"
 )
 
 var keywords = map[string]TokenType{
@@ -67,6 +71,9 @@ var keywords = map[string]TokenType{
 	"temp":     TEMP,
 	"static":   STATIC,
 	"pointer":  POINTER,
+	"if_goto":  IFGOTO,
+	"goto":     GOTO,
+	"label":    LABEL,
 }
 
 func LookupIdent(ident string) TokenType {

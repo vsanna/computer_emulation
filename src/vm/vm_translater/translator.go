@@ -62,6 +62,12 @@ func (t *Translator) translateStatement(statement vm_ast.Statement) []string {
 		return t.translateNotStatement(stmt)
 	case *vm_ast.NeqStatement:
 		return t.translateNeqStatement(stmt)
+	case *vm_ast.LabelStatement:
+		return t.translateLabelStatement(stmt)
+	case *vm_ast.GotoStatement:
+		return t.translateGotoStatement(stmt)
+	case *vm_ast.IfGotoStatement:
+		return t.translateIfGotoStatement(stmt)
 	default:
 		log.Fatalf("unknown statement has come")
 	}
@@ -471,6 +477,24 @@ func (t *Translator) translateNeqStatement(stmt vm_ast.Statement) []string {
 	}...)
 	result = append(result, t.pushDregStatements()...)
 	return result
+}
+
+func (t *Translator) translateLabelStatement(stmt *vm_ast.LabelStatement) []string {
+	return []string{"(" + stmt.Value.Literal + ")"}
+}
+
+func (t *Translator) translateGotoStatement(stmt *vm_ast.GotoStatement) []string {
+	return []string{
+		"@" + stmt.Value.Literal,
+		"0;JMP",
+	}
+}
+
+func (t *Translator) translateIfGotoStatement(stmt *vm_ast.IfGotoStatement) []string {
+	return []string{
+		"@" + stmt.Value.Literal,
+		"D-1;JEQ", //if_goto文を呼ぶ前にDにcondをセットしておく。それが1 <=> D-1 == 0
+	}
 }
 
 func (t *Translator) buildEnvironment() {

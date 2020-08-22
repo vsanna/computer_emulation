@@ -67,12 +67,12 @@ func (p *Parser) parseStatement() vm_ast.Statement {
 		vm_tokenizer.AND, vm_tokenizer.OR, vm_tokenizer.NOT,
 		vm_tokenizer.EQ, vm_tokenizer.NEG, vm_tokenizer.GT, vm_tokenizer.LT:
 		return p.parseArithmeticLogicalStatement()
-	//case vm_tokenizer.LABEL:
-	//	return p.parseLabelStatement()
-	//case vm_tokenizer.GOTO:
-	//	return p.parseGotoStatement()
-	//case vm_tokenizer.IFGOTO:
-	//	return p.parseIfgotoStatement()
+	case vm_tokenizer.LABEL:
+		return p.parseLabelStatement()
+	case vm_tokenizer.GOTO:
+		return p.parseGotoStatement()
+	case vm_tokenizer.IFGOTO:
+		return p.parseIfGotoStatement()
 	//case vm_tokenizer.RETURN:
 	//	return p.parseReturnStatement()
 	//case vm_tokenizer.FUNCTION:
@@ -230,4 +230,69 @@ func (p *Parser) parseAssignmentStatement() vm_ast.Statement {
 		},
 		Line: 1,
 	}
+}
+
+func (p *Parser) parseLabelStatement() vm_ast.Statement {
+	// be in [label] val
+	var statement vm_ast.LabelStatement
+
+	if !p.expectPeek(vm_tokenizer.IDENT) {
+		log.Fatalf("unexpected token. expected=%q, actual=%q", vm_tokenizer.IDENT, p.currentToken)
+	}
+
+	statement.Value = p.currentToken
+	statement.Line = p.currentLine
+
+	p.currentLine += 1
+	p.nextToken()
+
+	return statement
+}
+
+func (p *Parser) parseGotoStatement() vm_ast.Statement {
+	// be in [label] val
+	var statement vm_ast.GotoStatement
+
+	if !(p.peekTokenIs(vm_tokenizer.IDENT) ||
+		p.peekTokenIs(vm_tokenizer.INT)) {
+		p.addError(fmt.Sprintf("unexpected token. actual=%q", p.currentToken.Type))
+		log.Error("parse error")
+		os.Exit(1)
+		return nil
+	}
+
+	// move to label [val]
+	p.nextToken()
+
+	statement.Value = p.currentToken
+	statement.Line = p.currentLine
+
+	p.currentLine += 1
+	p.nextToken()
+
+	return statement
+}
+
+func (p *Parser) parseIfGotoStatement() vm_ast.Statement {
+	// be in [label] val
+	var statement vm_ast.IfGotoStatement
+
+	if !(p.peekTokenIs(vm_tokenizer.IDENT) ||
+		p.peekTokenIs(vm_tokenizer.INT)) {
+		p.addError(fmt.Sprintf("unexpected token. actual=%q", p.currentToken.Type))
+		log.Error("parse error")
+		os.Exit(1)
+		return nil
+	}
+
+	// move to label [val]
+	p.nextToken()
+
+	statement.Value = p.currentToken
+	statement.Line = p.currentLine
+
+	p.currentLine += 1
+	p.nextToken()
+
+	return statement
 }

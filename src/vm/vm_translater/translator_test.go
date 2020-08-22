@@ -8,9 +8,9 @@ import (
 	"testing"
 )
 
+// TODO: fix the test
 func TestTranslator_translatePushStatement(t1 *testing.T) {
 	input := `
-	@tmp
 	push constant 1
 	push constant tmp
 
@@ -27,7 +27,7 @@ func TestTranslator_translatePushStatement(t1 *testing.T) {
 	push temp tmp
 
 	push pointer 1
-	push pointer tmp
+	push pointer 0
 
 	push this 1
 	push this tmp
@@ -49,7 +49,7 @@ func TestTranslator_translatePushStatement(t1 *testing.T) {
 		{expectedLine: "M=D;"},
 
 		// push statement
-		{expectedLine: "@2"},
+		{expectedLine: "@1"},
 		{expectedLine: "D=A;"},
 		{expectedLine: "@SP"},
 		{expectedLine: "A=M;"},

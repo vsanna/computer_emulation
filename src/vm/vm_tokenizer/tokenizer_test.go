@@ -36,6 +36,10 @@ pop that 0
 pop pointer 0
 pop temp 0
 pop constant 0
+
+label testline
+goto testline
+if_goto testline
 `
 	tokenizer := New(input)
 
@@ -77,6 +81,10 @@ pop constant 0
 		{POP, "pop"}, {POINTER, "pointer"}, {INT, "0"},
 		{POP, "pop"}, {TEMP, "temp"}, {INT, "0"},
 		{POP, "pop"}, {CONSTANT, "constant"}, {INT, "0"},
+
+		{LABEL, "label"}, {IDENT, "testline"},
+		{GOTO, "goto"}, {IDENT, "testline"},
+		{IFGOTO, "if_goto"}, {IDENT, "testline"},
 
 		{EOF, ""},
 	}

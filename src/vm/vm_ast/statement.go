@@ -202,3 +202,51 @@ func (a NotStatement) String() string {
 func (a NotStatement) LineNumber() int {
 	return a.Line
 }
+
+type LabelStatement struct {
+	Value vm_tokenizer.Token
+	Line  int
+}
+
+func (a LabelStatement) statement() {
+}
+
+func (a LabelStatement) String() string {
+	return vm_tokenizer.LABEL + " " + a.Value.Literal
+}
+
+func (a LabelStatement) LineNumber() int {
+	return a.Line
+}
+
+type GotoStatement struct {
+	Value vm_tokenizer.Token
+	Line  int
+}
+
+func (a GotoStatement) statement() {
+}
+
+func (a GotoStatement) String() string {
+	return vm_tokenizer.GOTO + " " + a.Value.Literal
+}
+
+func (a GotoStatement) LineNumber() int {
+	return a.Line
+}
+
+type IfGotoStatement struct {
+	Value vm_tokenizer.Token
+	Line  int
+}
+
+func (a IfGotoStatement) statement() {
+}
+
+func (a IfGotoStatement) String() string {
+	return vm_tokenizer.IFGOTO + " " + a.Value.Literal
+}
+
+func (a IfGotoStatement) LineNumber() int {
+	return a.Line
+}

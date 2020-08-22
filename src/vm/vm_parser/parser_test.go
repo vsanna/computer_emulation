@@ -210,3 +210,122 @@ func TestParser_parseArithmeticStatement(t *testing.T) {
 	}
 
 }
+
+func TestParser_parseLabelStatement(t *testing.T) {
+	tests := []struct {
+		input                string
+		expectedStatement    string
+		expectedValueLiteral string
+		expectedValueType    vm_tokenizer.TokenType
+	}{
+		{"label hoge", "LABEL hoge", "hoge", vm_tokenizer.IDENT},
+	}
+	for i, test := range tests {
+		tokenizer := vm_tokenizer.New(test.input)
+		parser := New(tokenizer)
+		program := parser.ParseProgram()
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements has more than 1 statement. got=%d", len(program.Statements))
+		}
+
+		statement := program.Statements[0]
+
+		if statement.String() != test.expectedStatement {
+			t.Fatalf("[%d] statement.String() is wrong. expected = %q, actual = %q", i, test.expectedStatement, statement.String())
+		}
+
+		pushStatement, ok := statement.(vm_ast.LabelStatement)
+
+		if !ok {
+			t.Fatalf("failed to convert from Statement to LabelStatement. actual=%T", statement)
+		}
+
+		if pushStatement.Value.Literal != test.expectedValueLiteral {
+			t.Fatalf("unexpected value. expected=%q, actual=%q", test.expectedValueLiteral, pushStatement.Value.Literal)
+		}
+		if pushStatement.Value.Type != test.expectedValueType {
+			t.Fatalf("unexpected value. expected=%q, actual=%q", test.expectedValueType, pushStatement.Value.Type)
+		}
+
+	}
+}
+
+func TestParser_parseGotoStatement(t *testing.T) {
+	tests := []struct {
+		input                string
+		expectedStatement    string
+		expectedValueLiteral string
+		expectedValueType    vm_tokenizer.TokenType
+	}{
+		{"goto 100", "GOTO 100", "100", vm_tokenizer.INT},
+		{"goto hoge", "GOTO hoge", "hoge", vm_tokenizer.IDENT},
+	}
+	for i, test := range tests {
+		tokenizer := vm_tokenizer.New(test.input)
+		parser := New(tokenizer)
+		program := parser.ParseProgram()
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements has more than 1 statement. got=%d", len(program.Statements))
+		}
+
+		statement := program.Statements[0]
+
+		if statement.String() != test.expectedStatement {
+			t.Fatalf("[%d] statement.String() is wrong. expected = %q, actual = %q", i, test.expectedStatement, statement.String())
+		}
+
+		pushStatement, ok := statement.(vm_ast.GotoStatement)
+
+		if !ok {
+			t.Fatalf("failed to convert from Statement to LabelStatement. actual=%T", statement)
+		}
+
+		if pushStatement.Value.Literal != test.expectedValueLiteral {
+			t.Fatalf("unexpected value. expected=%q, actual=%q", test.expectedValueLiteral, pushStatement.Value.Literal)
+		}
+		if pushStatement.Value.Type != test.expectedValueType {
+			t.Fatalf("unexpected value. expected=%q, actual=%q", test.expectedValueType, pushStatement.Value.Type)
+		}
+
+	}
+}
+
+func TestParser_parseIfGotoStatement(t *testing.T) {
+	tests := []struct {
+		input                string
+		expectedStatement    string
+		expectedValueLiteral string
+		expectedValueType    vm_tokenizer.TokenType
+	}{
+		{"if_goto 100", "IFGOTO 100", "100", vm_tokenizer.INT},
+		{"if_goto hoge", "IFGOTO hoge", "hoge", vm_tokenizer.IDENT},
+	}
+	for i, test := range tests {
+		tokenizer := vm_tokenizer.New(test.input)
+		parser := New(tokenizer)
+		program := parser.ParseProgram()
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements has more than 1 statement. got=%d", len(program.Statements))
+		}
+
+		statement := program.Statements[0]
+
+		if statement.String() != test.expectedStatement {
+			t.Fatalf("[%d] statement.String() is wrong. expected = %q, actual = %q", i, test.expectedStatement, statement.String())
+		}
+
+		pushStatement, ok := statement.(vm_ast.IfGotoStatement)
+
+		if !ok {
+			t.Fatalf("failed to convert from Statement to LabelStatement. actual=%T", statement)
+		}
+
+		if pushStatement.Value.Literal != test.expectedValueLiteral {
+			t.Fatalf("unexpected value. expected=%q, actual=%q", test.expectedValueLiteral, pushStatement.Value.Literal)
+		}
+		if pushStatement.Value.Type != test.expectedValueType {
+			t.Fatalf("unexpected value. expected=%q, actual=%q", test.expectedValueType, pushStatement.Value.Type)
+		}
+
+	}
+}
