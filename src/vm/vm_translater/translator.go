@@ -67,8 +67,11 @@ func (t *Translator) translateStatement(statement vm_ast.Statement) []string {
 	case *vm_ast.GotoStatement:
 		return t.translateGotoStatement(stmt)
 	case *vm_ast.IfGotoStatement:
+		log.Printf("====")
 		return t.translateIfGotoStatement(stmt)
 	default:
+		log.Printf("%v", stmt)
+		log.Printf("%T", stmt)
 		log.Fatalf("unknown statement has come")
 	}
 	return []string{}
@@ -433,9 +436,9 @@ func (t *Translator) translateNotStatement(stmt vm_ast.Statement) []string {
 		"@R5",
 		"D=M-1;",
 		"@" + keyString + "_THEN",
-		"D;JEQ", // Dが0 <=> Mが1 <=> R5には1が入っている <=> 0をpushする
+		"D;JEQ", // Dが0 <=> Mが1 <=> R5には1が入っている <=> 0をpushする. 1のみtrue
 		"@" + keyString + "_ELSE",
-		"0;JMP", // Dが0 <=> Mが1 <=> R5には1が入っている <=> 0をpushする
+		"0;JMP",
 	}...)
 
 	// true section
@@ -492,7 +495,11 @@ func (t *Translator) translateGotoStatement(stmt *vm_ast.GotoStatement) []string
 
 func (t *Translator) translateIfGotoStatement(stmt *vm_ast.IfGotoStatement) []string {
 	return []string{
+		"@SP",
+		"A=M-1;",
+		"D=M;",
 		"@" + stmt.Value.Literal,
+		// 1のみtrue. それ以外はfalse
 		"D-1;JEQ", //if_goto文を呼ぶ前にDにcondをセットしておく。それが1 <=> D-1 == 0
 	}
 }

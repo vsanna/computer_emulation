@@ -234,7 +234,7 @@ func (p *Parser) parseAssignmentStatement() vm_ast.Statement {
 
 func (p *Parser) parseLabelStatement() vm_ast.Statement {
 	// be in [label] val
-	var statement vm_ast.LabelStatement
+	statement := &vm_ast.LabelStatement{}
 
 	if !p.expectPeek(vm_tokenizer.IDENT) {
 		log.Fatalf("unexpected token. expected=%q, actual=%q", vm_tokenizer.IDENT, p.currentToken)
@@ -251,7 +251,7 @@ func (p *Parser) parseLabelStatement() vm_ast.Statement {
 
 func (p *Parser) parseGotoStatement() vm_ast.Statement {
 	// be in [label] val
-	var statement vm_ast.GotoStatement
+	statement := &vm_ast.GotoStatement{}
 
 	if !(p.peekTokenIs(vm_tokenizer.IDENT) ||
 		p.peekTokenIs(vm_tokenizer.INT)) {
@@ -275,7 +275,7 @@ func (p *Parser) parseGotoStatement() vm_ast.Statement {
 
 func (p *Parser) parseIfGotoStatement() vm_ast.Statement {
 	// be in [label] val
-	var statement vm_ast.IfGotoStatement
+	statement := &vm_ast.IfGotoStatement{}
 
 	if !(p.peekTokenIs(vm_tokenizer.IDENT) ||
 		p.peekTokenIs(vm_tokenizer.INT)) {
