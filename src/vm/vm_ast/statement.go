@@ -39,6 +39,35 @@ func (a PushStatement) LineNumber() int {
 	return a.Line
 }
 
+type PopStatement struct {
+	Segment vm_tokenizer.Token
+	Value   vm_tokenizer.Token
+	Line    int
+}
+
+func NewPopStatement() *PopStatement {
+	return &PopStatement{
+		Value:   vm_tokenizer.ZeroToken(),
+		Segment: vm_tokenizer.ZeroToken(),
+	}
+}
+
+func (a PopStatement) statement() {
+}
+
+func (a PopStatement) String() string {
+	result := vm_tokenizer.POP
+	if !a.Segment.IsZero() {
+		result += " " + a.Segment.Literal
+	}
+	result += " " + a.Value.Literal
+	return result
+}
+
+func (a PopStatement) LineNumber() int {
+	return a.Line
+}
+
 type AddStatement struct {
 	Line int
 }

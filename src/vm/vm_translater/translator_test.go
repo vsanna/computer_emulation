@@ -3,13 +3,37 @@ package vm_translater
 import (
 	"computer_emulation/src/vm/vm_parser"
 	"computer_emulation/src/vm/vm_tokenizer"
+	"log"
 	"strings"
 	"testing"
 )
 
 func TestTranslator_translatePushStatement(t1 *testing.T) {
 	input := `
-	push constant 2
+	@tmp
+	push constant 1
+	push constant tmp
+
+	push argument 1
+	push argument tmp 
+
+	push local 0
+	push local tml
+
+	push static 1
+	push static tmp
+
+	push temp 1
+	push temp tmp
+
+	push pointer 1
+	push pointer tmp
+
+	push this 1
+	push this tmp
+
+	push that 1
+	push that tmp
 `
 	t2 := vm_tokenizer.New(input)
 	p := vm_parser.New(t2)
@@ -18,10 +42,13 @@ func TestTranslator_translatePushStatement(t1 *testing.T) {
 	tests := []struct {
 		expectedLine string
 	}{
+		// setup vm
 		{expectedLine: "@255"},
 		{expectedLine: "D=A;"},
 		{expectedLine: "@SP"},
 		{expectedLine: "M=D;"},
+
+		// push statement
 		{expectedLine: "@2"},
 		{expectedLine: "D=A;"},
 		{expectedLine: "@SP"},
@@ -30,14 +57,21 @@ func TestTranslator_translatePushStatement(t1 *testing.T) {
 		{expectedLine: "@SP"},
 		{expectedLine: "D=M;"},
 		{expectedLine: "M=D+1;"},
+
+		// inf loop
+		{expectedLine: "(VM_END)"},
+		{expectedLine: "@VM_END"},
+		{expectedLine: "0;JMP"},
 	}
 
 	translator := New(program)
 	translatedLines := translator.Translate()
 
+	log.Println(translatedLines)
+
 	for i, line := range strings.Split(translatedLines, "\n") {
 		if line != tests[i].expectedLine {
-			t1.Fatalf("invalid translation. expected=%q, actual=%q", tests[i].expectedLine, line)
+			t1.Fatalf("[%d] invalid translation. expected=%q, actual=%q", i, tests[i].expectedLine, line)
 		}
 	}
 }

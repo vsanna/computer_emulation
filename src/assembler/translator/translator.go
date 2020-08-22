@@ -6,7 +6,6 @@ import (
 	"computer_emulation/src/bit"
 	"computer_emulation/src/memory"
 	"log"
-	"os"
 	"strconv"
 )
 
@@ -94,7 +93,6 @@ func (t *Translator) translateStatement(statement ast.Statement) string {
 		return t.translateOpsAndJumpStatement(stmt)
 	default:
 		log.Fatalf("unknown statement has come")
-		os.Exit(1)
 	}
 	return ""
 }
@@ -135,7 +133,6 @@ func (t *Translator) translateAllocationStatement(stmt *ast.AllocationStatement)
 		address, err := strconv.Atoi(stmt.Value.Literal)
 		if err != nil {
 			log.Fatalf("invalid combination of literal and tokentype")
-			os.Exit(1)
 		}
 		return intToBinaryString(address)
 	}
@@ -175,11 +172,9 @@ func (t *Translator) translateOpsAndJumpStatement(stmt *ast.OpsAndJumpStatement)
 				compBits = []int{1, 1, 1, 1, 1, 1}
 			default:
 				log.Fatalf("invalid comp. comp size 1 and Value is int, but not 0 or 1. actual = %q", stmt.Comp[0].Literal)
-				os.Exit(1)
 			}
 		default:
 			log.Fatalf("invalid comp. comp size 1 but Value is not A nor D nor M nor int. int, actual = %q", stmt.Comp[0].Type)
-			os.Exit(1)
 		}
 	case 2:
 		switch stmt.Comp[0].Type {
@@ -199,7 +194,6 @@ func (t *Translator) translateOpsAndJumpStatement(stmt *ast.OpsAndJumpStatement)
 				compBits = []int{1, 1, 1, 0, 1, 0}
 			default:
 				log.Fatalf("invalid comp. comp size is 2 and MINUS is the head, but trailing value is unexpected one. actual=%q", stmt.Comp[0].Literal)
-				os.Exit(1)
 			}
 		case tokenizer.BANG:
 			switch stmt.Comp[1].Type {
@@ -214,13 +208,11 @@ func (t *Translator) translateOpsAndJumpStatement(stmt *ast.OpsAndJumpStatement)
 				compBits = []int{1, 1, 0, 0, 0, 1}
 			default:
 				log.Fatalf("invalid comp. comp size is 2 and BANG is the head, but trailing value is unexpected one. actual=%q", stmt.Comp[1].Literal)
-				os.Exit(1)
 			}
 		default:
 			log.Printf("stmt = %q", stmt)
 			log.Printf("stmt.Comp = %q", stmt.Comp)
 			log.Fatalf("invalid comp. comp size is 2 but the head is not BANG nor MINUS. actual=%q", stmt.Comp[1].Literal)
-			os.Exit(1)
 		}
 	case 3:
 		if stmt.Comp[0].Type == tokenizer.A_REG &&
@@ -332,7 +324,6 @@ func (t *Translator) translateOpsAndJumpStatement(stmt *ast.OpsAndJumpStatement)
 		}
 	default:
 		log.Fatalf("too many Comp")
-		os.Exit(1)
 	}
 
 	destBits := []int{0, 0, 0}

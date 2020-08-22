@@ -15,16 +15,32 @@ func main() {
 	runMachine()
 }
 
-func runMachine() {
-	fmt.Println("[HARDWARE] start main process.")
-	machine := computer.NewComputer()
-	machine.Run()
+func vmToAsm() {
+	filename := ""
+	if len(os.Args) == 1 {
+		filename = "./sample_vm/push_pop.vm"
+	} else {
+		filename = os.Args[1]
+	}
+
+	_, err := os.Stat(filename)
+	if err != nil {
+		if len(os.Args) == 1 {
+			fmt.Print("[ERROR] filename is not given")
+		} else {
+			fmt.Printf("[ERROR] given filename(%s) is not confirm. please confirm you have correct path", filename)
+		}
+	}
+
+	virtualMachine := vm.New()
+	program := virtualMachine.FromFile(filename)
+	log.Printf("\n%s", program)
 }
 
 func asmToMachineCode() {
 	filename := ""
 	if len(os.Args) == 1 {
-		filename = "./sample_asm/all_ops.asm"
+		filename = "./sample_asm/push_pop.asm"
 	} else {
 		filename = os.Args[1]
 	}
@@ -43,24 +59,8 @@ func asmToMachineCode() {
 	log.Printf("\n%s", program)
 }
 
-func vmToAsm() {
-	filename := ""
-	if len(os.Args) == 1 {
-		filename = "./sample_vm/all_ops.vm"
-	} else {
-		filename = os.Args[1]
-	}
-
-	_, err := os.Stat(filename)
-	if err != nil {
-		if len(os.Args) == 1 {
-			fmt.Print("[ERROR] filename is not given")
-		} else {
-			fmt.Printf("[ERROR] given filename(%s) is not confirm. please confirm you have correct path", filename)
-		}
-	}
-
-	virtualMachine := vm.New()
-	program := virtualMachine.FromFile(filename)
-	log.Printf("\n%s", program)
+func runMachine() {
+	fmt.Println("[HARDWARE] start main process.")
+	machine := computer.NewComputer()
+	machine.Run()
 }

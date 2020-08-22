@@ -6,7 +6,6 @@ import (
 	"computer_emulation/src/vm/vm_tokenizer"
 	"github.com/google/uuid"
 	"log"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -30,10 +29,12 @@ func New(program *vm_ast.Program) *Translator {
 
 func (t *Translator) Translate() string {
 	// 1. build environment map
+	// TODO: 不要
 	t.buildEnvironment()
 
 	// 2. evaluate statements
 	result := t.predefinedSetupStatement()
+
 	for _, statement := range t.program.Statements {
 		translatedStatements := t.translateStatement(statement)
 		for _, translatedStatement := range translatedStatements {
@@ -42,8 +43,8 @@ func (t *Translator) Translate() string {
 			result += translatedStatement + "\n"
 		}
 	}
-	result += result + t.predefinedTrailingStatement()
 
+	result += t.predefinedTrailingStatement()
 	return strings.TrimSpace(result)
 }
 
@@ -51,8 +52,8 @@ func (t *Translator) translateStatement(statement vm_ast.Statement) []string {
 	switch stmt := statement.(type) {
 	case *vm_ast.PushStatement:
 		return t.translatePushStatement(stmt)
-	//case *vm_ast.PopStatement:
-	//	return t.translatePopStatement(stmt)
+	case *vm_ast.PopStatement:
+		return t.translatePopStatement(stmt)
 	case *vm_ast.AddStatement, *vm_ast.SubStatement, *vm_ast.AndStatement, *vm_ast.OrStatement:
 		return t.translateBinaryOperationStatement(stmt)
 	case *vm_ast.EqStatement, *vm_ast.GtStatement, *vm_ast.LtStatement:
@@ -63,7 +64,6 @@ func (t *Translator) translateStatement(statement vm_ast.Statement) []string {
 		return t.translateNeqStatement(stmt)
 	default:
 		log.Fatalf("unknown statement has come")
-		os.Exit(1)
 	}
 	return []string{}
 }
@@ -72,67 +72,238 @@ func (t *Translator) translatePushStatement(stmt *vm_ast.PushStatement) []string
 
 	// TODO: replace with consts
 	// D = {stmt.Value.Literal}
-	setDistStatements := []string{}
+	setDregStatements := []string{}
 	switch stmt.Segment.Literal {
 	case "argument":
-		setDistStatements = []string{
+		setDregStatements = []string{
 			"@ARG",
 			"A=M;",
+			"D=A;",
+			"@" + stmt.Value.Literal,
+			"D=A+D;",
+			"A=D;",
+			"D=M;", // D = Mem[Mem[ARG] + idx]
 		}
 	case "local":
-		setDistStatements = []string{
+		setDregStatements = []string{
 			"@LCL",
 			"A=M;",
+			"D=A;",
+			"@" + stmt.Value.Literal,
+			"D=A+D;",
+			"A=D;",
+			"D=M;",
+		}
+	case "this":
+		setDregStatements = []string{
+			"@" + strconv.Itoa(memory.THIS_WORD_ADDRESS),
+			"A=M;",
+			"D=A;",
+			"@" + stmt.Value.Literal,
+			"D=A+D;",
+			"A=D;",
+			"D=M;", // D = Mem[Mem[THIS_WORD_ADDRESS] + idx]
+		}
+	case "that":
+		setDregStatements = []string{
+			"@" + strconv.Itoa(memory.THAT_WORD_ADDRESS),
+			"A=M;",
+			"D=A;",
+			"@" + stmt.Value.Literal,
+			"D=A+D;",
+			"A=D;",
+			"D=M;", // D = Mem[Mem[THAT_WORD_ADDRESS] + idx]
+		}
+	case "pointer":
+		// push pointer 0 means set base address of a object as THIS's
+		// push pointer 1 means set base address of a object as THAT's
+		assignCmd := ""
+		switch stmt.Value.Literal {
+		case "0":
+			assignCmd = "@" + strconv.Itoa(memory.THIS_WORD_ADDRESS)
+		case "1":
+			assignCmd = "@" + strconv.Itoa(memory.THAT_WORD_ADDRESS)
+		default:
+			log.Fatalf("invalid index")
+		}
+		setDregStatements = []string{
+			assignCmd,
+			"D=A;",
 		}
 	case "static":
 		// TODO: envと衝突する. 別の空間にする?
-		setDistStatements = []string{
+		setDregStatements = []string{
 			"@" + strconv.Itoa(memory.STATIC_BASE_ADDRESS),
-			"A=M;",
+			"D=A;",
+			"@" + stmt.Value.Literal,
+			"D=A+D;",
+			"A=D;",
+			"D=M;", // D = Mem[Mem[STATIC_BASE_ADDRESS + idx]] ... this/thatとは異なる!
+		}
+	case "temp":
+		setDregStatements = []string{
+			"@" + strconv.Itoa(memory.TEMP0_WORD_ADDRESS),
+			"D=A;",
+			"@" + stmt.Value.Literal,
+			"D=A+D;",
+			"A=D;",
+			"D=M;", // D = Mem[Mem[TEMP0_WORD_ADDRESS + idx]] ... this/thatとは異なる!
 		}
 	case "constant":
-		setDistStatements = []string{
+		setDregStatements = []string{
 			"@" + stmt.Value.Literal,
+			"D=A;",
+		}
+	}
+
+	lines := append(setDregStatements, t.pushDregStatements()...)
+
+	result := []string{}
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		if len(trimmedLine) == 0 {
+			continue
+		}
+		result = append(result, trimmedLine)
+	}
+	return result
+}
+
+func (t *Translator) translatePopStatement(stmt *vm_ast.PopStatement) []string {
+	// TODO: replace with consts
+	// D = {stmt.Value.Literal}
+	popTopValueStatement := t.popAndSetToStatements("R5")
+	setPoppedValueStatement := []string{}
+	switch stmt.Segment.Literal {
+	case "argument":
+		setPoppedValueStatement = []string{
+			// M[R6] = M[ARG] + 1
+			"@ARG",
+			"D=M+1;",
+			"@R6",
+			"M=D;",
+			// M[M[R6] = M[ARG] + 1] = M[R5]
+			"@R5",
+			"D=M;",
+			"@R6",
+			"A=M;",
+			"M=D;",
+		}
+	case "local":
+		setPoppedValueStatement = []string{
+			// M[R6] = M[LCL] + 1
+			"@LCL",
+			"D=M+1;",
+			"@R6",
+			"M=D;",
+			// M[M[R6] = M[LCL] + 1] = M[R5]
+			"@R5",
+			"D=M;",
+			"@R6",
+			"A=M;",
+			"M=D;",
 		}
 	case "this":
-		setDistStatements = []string{
+		setPoppedValueStatement = []string{
+			// M[R6] = M[THIS] + val
 			"@THIS",
+			"D=M;",
+			"@" + stmt.Value.Literal,
+			"D=A+D;",
+			"@R6",
+			"M=D;", // set an address of target field(M[THIS] + val) in R6
+			// M[M[THIS] + val] = M[R5]
+			"@R5",
+			"D=M;",
+			"@R6",
 			"A=M;",
+			"M=D;",
 		}
 	case "that":
-		setDistStatements = []string{
+		setPoppedValueStatement = []string{
+			// M[R6] = M[THIS] + val
 			"@THAT",
+			"D=M;",
+			"@" + stmt.Value.Literal,
+			"D=A+D;",
+			"@R6",
+			"M=D;", // set an address of target field(M[THIS] + val) in R6
+			// M[M[THIS] + val] = M[R5]
+			"@R5",
+			"D=M;",
+			"@R6",
 			"A=M;",
+			"M=D;",
 		}
 	case "pointer":
-		// TODO
+		switch stmt.Value.Type {
+		case vm_tokenizer.IDENT:
+			setPoppedValueStatement = []string{
+				// M[R6] = THIS_WORD_ADDRESS + ident
+				"@" + strconv.Itoa(memory.THIS_WORD_ADDRESS),
+				"D=A;",
+				"@" + stmt.Value.Literal,
+				"D=A+D;",
+				"@R6", // temp1
+				"M=D;",
+				// M[D] = M[R5]
+				"@R5", // temp2
+				"D=M;",
+				"@R6",
+				"A=M;",
+				"M=D;",
+			}
+		case vm_tokenizer.INT:
+			idx, _ := strconv.Atoi(stmt.Value.Literal)
+			setPoppedValueStatement = []string{
+				// M[R6] = THIS_WORD_ADDRESS + idx
+				"@" + strconv.Itoa(memory.THIS_WORD_ADDRESS+idx),
+				"D=A;",
+				"@R6",
+				"M=D;",
+				// M[D] = M[R5]
+				"@R5",
+				"D=M;",
+				"@R6",
+				"A=M;",
+				"M=D;",
+			}
+		default:
+			log.Fatalf("invalid TokenType")
+		}
+	case "static":
+		// pop static idx とは、@static.{idx}という変数名を宣言し、そこに格納することを意味する。asmのenvとスペースを共有。
+		// というより、vmからみてasmのenvに変数セットする命令がpop static idx
+		setPoppedValueStatement = []string{
+			"@R5",
+			"D=M;",
+			"@STATIC__" + stmt.Value.Literal,
+			"M=D;",
+		}
 	case "temp":
-		setDistStatements = []string{
+		setPoppedValueStatement = []string{
+			// M[R6] = TEMP0_WORD_ADDRESS + idx
 			"@" + strconv.Itoa(memory.TEMP0_WORD_ADDRESS),
+			"D=A;",
+			"@" + stmt.Value.Literal, // now assuming that Literal is always INT. if IDENT comes here, should change logic
+			"D=A+D;",
+			"@R6",
+			"M=D;",
+			// M[D] = M[R5]
+			"@R5",
+			"D=M;",
+			"@R6",
 			"A=M;",
+			"M=D;",
+		}
+	case "constant":
+		setPoppedValueStatement = []string{
+			"@R5",
+			"M=0;",
 		}
 	}
 
-	ops0 := append(
-		setDistStatements,
-		"D=A;",
-	)
-
-	// M[SP] = D
-	ops1 := []string{
-		"@SP",
-		"A=M;",
-		"M=D;",
-	}
-
-	// SP++
-	ops2 := []string{
-		"@SP",
-		"D=M;",
-		"M=D+1;",
-	}
-
-	lines := append(append(ops0, ops1...), ops2...)
+	lines := append(popTopValueStatement, setPoppedValueStatement...)
 
 	result := []string{}
 	for _, line := range lines {
@@ -342,9 +513,8 @@ func (t *Translator) popAndSetToStatements(registerName string) []string {
 		////  {registerName} = pop()
 		// M[SP] = M[SP] - 1
 		"@SP",
-		"D=M;",
-		"M=D-1;",
-		// {registerName} = M[SP]
+		"M=M-1;",
+		// {registerName} = M[M[SP]]
 		"@SP",
 		"A=M;",
 		"D=M;",

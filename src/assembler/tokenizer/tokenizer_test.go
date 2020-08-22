@@ -51,7 +51,6 @@ func TestTokenizer_NextToken(t *testing.T) {
 	@R13
 	@R14
 	@R15
-	@4
 	@generated_ident__0bd71bf4_e3ab_11ea_9852_acde48001122_THEN
 	D;JEQ
 	@generated_ident__0bd71bf4_e3ab_11ea_9852_acde48001122_ELSE

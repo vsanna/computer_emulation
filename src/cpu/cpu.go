@@ -110,6 +110,20 @@ func (cpu *Cpu) Reset(resetBit *Bit) {
 	return
 }
 
+func (cpu *Cpu) decode(in *Bus) (
+	isCommandA *Bit,
+	address *Bus,
+	opsBus *Bus,
+	destBus *Bus,
+	jumpBus *Bus,
+) {
+	return cpu.decoder.Pass(in)
+}
+
+/**********************************
+* for debugging
+**********************************/
+
 func (cpu *Cpu) ShowDebugInfoForStatus() {
 	log.Printf(
 		"[DEBUG] A=%v, D=%v, M(Memory[A])=%v, PC=%v:NEXT_INST=%v\n",
@@ -120,6 +134,7 @@ func (cpu *Cpu) ShowDebugInfoForStatus() {
 		cpu.program_memory.Pass(nil, OFF, cpu.pc_reg.Pass(nil, OFF)),
 	)
 	cpu.ShowDebugInfoForGlobalStack()
+	cpu.ShowDebugInfoForSegments()
 }
 
 func (cpu *Cpu) ShowDebugInfoForGlobalStack() {
@@ -130,7 +145,73 @@ func (cpu *Cpu) ShowDebugInfoForGlobalStack() {
 		globalStack = append(globalStack, cpu.data_memory.Pass(nil, OFF, bit.IntToBus(i)).ToInt())
 	}
 	// NOTE: least pos is always 0 since it's where new val will come in.
-	log.Printf("[DEBUG] GlobalStack = %v", start, end, globalStack)
+	log.Printf("[DEBUG] GlobalStack = %v", globalStack)
+}
+
+// NOTE:
+// this/that/argument/localはbase addressから+5まで
+// static/temp/pointer
+func (cpu *Cpu) ShowDebugInfoForSegments() {
+	localSegment := []int{
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.LCL_WORD_ADDRESS)).ToInt()+0)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.LCL_WORD_ADDRESS)).ToInt()+1)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.LCL_WORD_ADDRESS)).ToInt()+2)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.LCL_WORD_ADDRESS)).ToInt()+3)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.LCL_WORD_ADDRESS)).ToInt()+4)).ToInt(),
+	}
+	argumentSegment := []int{
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.ARG_WORD_ADDRESS)).ToInt()+0)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.ARG_WORD_ADDRESS)).ToInt()+1)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.ARG_WORD_ADDRESS)).ToInt()+2)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.ARG_WORD_ADDRESS)).ToInt()+3)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.ARG_WORD_ADDRESS)).ToInt()+4)).ToInt(),
+	}
+	pointerSegment := []int{
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.THIS_WORD_ADDRESS)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.THAT_WORD_ADDRESS)).ToInt(),
+	}
+	thisSegment := []int{
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.THIS_WORD_ADDRESS)).ToInt()+0)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.THIS_WORD_ADDRESS)).ToInt()+1)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.THIS_WORD_ADDRESS)).ToInt()+2)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.THIS_WORD_ADDRESS)).ToInt()+3)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.THIS_WORD_ADDRESS)).ToInt()+4)).ToInt(),
+	}
+	thatSegment := []int{
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.THAT_WORD_ADDRESS)).ToInt()+0)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.THAT_WORD_ADDRESS)).ToInt()+1)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.THAT_WORD_ADDRESS)).ToInt()+2)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.THAT_WORD_ADDRESS)).ToInt()+3)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.THAT_WORD_ADDRESS)).ToInt()+4)).ToInt(),
+	}
+	staticSegument := []int{
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.STATIC_BASE_ADDRESS+0)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.STATIC_BASE_ADDRESS+1)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.STATIC_BASE_ADDRESS+2)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.STATIC_BASE_ADDRESS+3)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.STATIC_BASE_ADDRESS+4)).ToInt(),
+	}
+	tempSegment := []int{
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.TEMP0_WORD_ADDRESS+0)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.TEMP0_WORD_ADDRESS+1)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.TEMP0_WORD_ADDRESS+2)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.TEMP0_WORD_ADDRESS+3)).ToInt(),
+		cpu.data_memory.Pass(nil, OFF, bit.IntToBus(memory.TEMP0_WORD_ADDRESS+4)).ToInt(),
+	}
+
+	log.Printf("[DEBUG] LOCAL    = %v", localSegment)
+	log.Printf("[DEBUG] ARGUMENT = %v", argumentSegment)
+	log.Printf("[DEBUG] POINTER  = %v", pointerSegment)
+	log.Printf("[DEBUG] THIS     = %v", thisSegment)
+	log.Printf("[DEBUG] THAT     = %v", thatSegment)
+	log.Printf("[DEBUG] STATIC   = %v", staticSegument)
+	log.Printf("[DEBUG] TEMP     = %v", tempSegment)
+	//
+	//dataMemoryHeadsSegment := []int{}
+	//for i := 0; i < 10; i++ {
+	//	dataMemoryHeadsSegment = append(dataMemoryHeadsSegment, cpu.data_memory.Pass(nil, OFF, bit.IntToBus(i)).ToInt())
+	//}
+	//log.Printf("[DEBUG] MEMORY    = %v", dataMemoryHeadsSegment)
 }
 
 func (cpu *Cpu) ShowDebugInfoForOperation(address *Bus, isCommandA *Bit, opsBus *Bus, destBus *Bus, jumpBus *Bus) {
@@ -141,14 +222,4 @@ func (cpu *Cpu) ShowDebugInfoForOperation(address *Bus, isCommandA *Bit, opsBus 
 		[]*bit.Bit{destBus.Bits[0], destBus.Bits[1], destBus.Bits[2]},
 		[]*bit.Bit{jumpBus.Bits[0], jumpBus.Bits[1], jumpBus.Bits[2]},
 	)
-}
-
-func (cpu *Cpu) decode(in *Bus) (
-	isCommandA *Bit,
-	address *Bus,
-	opsBus *Bus,
-	destBus *Bus,
-	jumpBus *Bus,
-) {
-	return cpu.decoder.Pass(in)
 }

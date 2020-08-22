@@ -28,12 +28,21 @@ eq
 neg
 gt
 lt
+
+pop static 0
+pop local 0
+pop argument 0
+pop this 0
+pop that 0
+pop pointer 0
+pop temp 0
+pop constant 0
 `
 	t2 := vm_tokenizer.New(input)
 	parser := New(t2)
 	program := parser.ParseProgram()
 
-	expectedLineNum := 19
+	expectedLineNum := 27
 
 	if len(program.Statements) != expectedLineNum {
 		t.Fatalf("program.Statements doesn't have %d statements. got=%d", expectedLineNum, len(program.Statements))
@@ -61,6 +70,14 @@ lt
 		{expectedLineNumber: 16},
 		{expectedLineNumber: 17},
 		{expectedLineNumber: 18},
+		{expectedLineNumber: 19},
+		{expectedLineNumber: 20},
+		{expectedLineNumber: 21},
+		{expectedLineNumber: 22},
+		{expectedLineNumber: 23},
+		{expectedLineNumber: 24},
+		{expectedLineNumber: 25},
+		{expectedLineNumber: 26},
 	}
 
 	for i, statement := range program.Statements {
@@ -97,6 +114,48 @@ func TestParser_ParseProgram_PushStatement(t *testing.T) {
 		}
 
 		pushStatement, ok := statement.(*vm_ast.PushStatement)
+
+		if !ok {
+			t.Fatalf("failed to convert from Statement to AllocationStatement. actual=%T", statement)
+		}
+
+		if pushStatement.Value.Literal != test.expectedValueLiteral {
+			t.Fatalf("unexpected value. expected=%q, actual=%q", test.expectedValueLiteral, pushStatement.Value.Literal)
+		}
+		if pushStatement.Value.Type != test.expectedValueType {
+			t.Fatalf("unexpected value. expected=%q, actual=%q", test.expectedValueType, pushStatement.Value.Type)
+		}
+
+	}
+}
+
+func TestParser_ParseProgram_PopStatement(t *testing.T) {
+	tests := []struct {
+		input                string
+		expectedStatement    string
+		expectedValueLiteral string
+		expectedValueType    vm_tokenizer.TokenType
+	}{
+		{"pop constant 10", "POP constant 10", "10", vm_tokenizer.INT},
+		{"pop constant myval", "POP constant myval", "myval", vm_tokenizer.IDENT},
+		{"pop 10", "POP 10", "10", vm_tokenizer.INT},
+		{"pop myval", "POP myval", "myval", vm_tokenizer.IDENT},
+	}
+	for i, test := range tests {
+		tokenizer := vm_tokenizer.New(test.input)
+		parser := New(tokenizer)
+		program := parser.ParseProgram()
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements has more than 1 statement. got=%d", len(program.Statements))
+		}
+
+		statement := program.Statements[0]
+
+		if statement.String() != test.expectedStatement {
+			t.Fatalf("[%d] statement.String() is wrong. expected = %q, actual = %q", i, test.expectedStatement, statement.String())
+		}
+
+		pushStatement, ok := statement.(*vm_ast.PopStatement)
 
 		if !ok {
 			t.Fatalf("failed to convert from Statement to AllocationStatement. actual=%T", statement)

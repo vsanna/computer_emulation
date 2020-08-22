@@ -27,6 +27,15 @@ eq
 neg
 gt
 lt
+
+pop static 0
+pop local 0
+pop argument 0
+pop this 0
+pop that 0
+pop pointer 0
+pop temp 0
+pop constant 0
 `
 	tokenizer := New(input)
 
@@ -59,6 +68,15 @@ lt
 		{NEG, "neg"},
 		{GT, "gt"},
 		{LT, "lt"},
+
+		{POP, "pop"}, {STATIC, "static"}, {INT, "0"},
+		{POP, "pop"}, {LOCAL, "local"}, {INT, "0"},
+		{POP, "pop"}, {ARGUMENT, "argument"}, {INT, "0"},
+		{POP, "pop"}, {THIS, "this"}, {INT, "0"},
+		{POP, "pop"}, {THAT, "that"}, {INT, "0"},
+		{POP, "pop"}, {POINTER, "pointer"}, {INT, "0"},
+		{POP, "pop"}, {TEMP, "temp"}, {INT, "0"},
+		{POP, "pop"}, {CONSTANT, "constant"}, {INT, "0"},
 
 		{EOF, ""},
 	}

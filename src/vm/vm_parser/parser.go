@@ -61,8 +61,8 @@ func (p *Parser) parseStatement() vm_ast.Statement {
 	switch p.currentToken.Type {
 	case vm_tokenizer.PUSH:
 		return p.parsePushStatement()
-	//case vm_tokenizer.POP:
-	//	return p.parsePopStatement()
+	case vm_tokenizer.POP:
+		return p.parsePopStatement()
 	case vm_tokenizer.ADD, vm_tokenizer.SUB,
 		vm_tokenizer.AND, vm_tokenizer.OR, vm_tokenizer.NOT,
 		vm_tokenizer.EQ, vm_tokenizer.NEG, vm_tokenizer.GT, vm_tokenizer.LT:
@@ -86,6 +86,51 @@ func (p *Parser) parseStatement() vm_ast.Statement {
 
 func (p *Parser) parsePushStatement() vm_ast.Statement {
 	statement := vm_ast.NewPushStatement()
+
+	if !(p.peekTokenIs(vm_tokenizer.IDENT) ||
+		p.peekTokenIs(vm_tokenizer.INT) ||
+		p.peekTokenIs(vm_tokenizer.CONSTANT) ||
+		p.peekTokenIs(vm_tokenizer.ARGUMENT) ||
+		p.peekTokenIs(vm_tokenizer.LOCAL) ||
+		p.peekTokenIs(vm_tokenizer.STATIC) ||
+		p.peekTokenIs(vm_tokenizer.THIS) ||
+		p.peekTokenIs(vm_tokenizer.THAT) ||
+		p.peekTokenIs(vm_tokenizer.POINTER) ||
+		p.peekTokenIs(vm_tokenizer.TEMP) ||
+		p.peekTokenIs(vm_tokenizer.POINTER)) {
+		p.addError(fmt.Sprintf("unexpected token. actual=%q", p.currentToken.Type))
+		log.Error("parse error")
+		os.Exit(1)
+		return nil
+	}
+
+	// be in [push] val
+	if p.peekTokenIs(vm_tokenizer.IDENT) || p.peekTokenIs(vm_tokenizer.INT) {
+		// move to push [val]
+		p.nextToken()
+		statement.Value = p.currentToken
+		statement.Line = p.currentLine
+		p.currentLine += 1
+		p.nextToken()
+		return statement
+	}
+
+	// be in [push] segment val
+	// move to push [segment] val
+	p.nextToken()
+	statement.Segment = p.currentToken
+	// move to push segment [val]
+	p.nextToken()
+
+	statement.Value = p.currentToken
+	statement.Line = p.currentLine
+	p.currentLine += 1
+	p.nextToken()
+	return statement
+}
+
+func (p *Parser) parsePopStatement() vm_ast.Statement {
+	statement := vm_ast.NewPopStatement()
 
 	if !(p.peekTokenIs(vm_tokenizer.IDENT) ||
 		p.peekTokenIs(vm_tokenizer.INT) ||

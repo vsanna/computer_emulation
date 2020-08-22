@@ -21,7 +21,7 @@ const (
 	INT = "INT"
 
 	PUSH = "PUSH"
-	//POP  = "POP"
+	POP  = "POP"
 
 	ADD = "ADD"
 	SUB = "SUB"
@@ -36,17 +36,20 @@ const (
 	NEG = "NEG"
 
 	CONSTANT = "CONSTANT"
+	// dynamic
 	LOCAL    = "LOCAL"
 	ARGUMENT = "ARGUMENT"
 	THIS     = "THIS"
 	THAT     = "THAT"
 	POINTER  = "POINTER"
-	TEMP     = "TEMP"
-	STATIC   = "STATIC"
+	// static
+	TEMP   = "TEMP"
+	STATIC = "STATIC"
 )
 
 var keywords = map[string]TokenType{
 	"push":     PUSH,
+	"pop":      POP,
 	"add":      ADD,
 	"sub":      SUB,
 	"and":      AND,
