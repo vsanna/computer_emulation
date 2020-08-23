@@ -6,7 +6,6 @@ import (
 	"computer_emulation/src/assembler/translator"
 	"github.com/labstack/gommon/log"
 	"io/ioutil"
-	"os"
 )
 
 // from file or string
@@ -28,11 +27,7 @@ func (a Assembler) FromString(assemblerCode string) string {
 func (a Assembler) FromFile(filepath string) string {
 	filecontent, err := ioutil.ReadFile(filepath)
 	if err != nil {
-		log.Error(err)
-		os.Exit(1)
+		log.Fatalf("%q", err)
 	}
-
-	code := string(filecontent)
-
-	return a.FromString(code)
+	return a.FromString(string(filecontent))
 }

@@ -40,6 +40,10 @@ pop constant 0
 label testline
 goto testline
 if_goto testline
+
+function hoge 1
+return
+call hoge 2
 `
 	tokenizer := New(input)
 
@@ -47,12 +51,8 @@ if_goto testline
 		expectedType    TokenType
 		expectedLiteral string
 	}{
-		{PUSH, "push"},
-		{CONSTANT, "constant"},
-		{INT, "2"},
-		{PUSH, "push"},
-		{CONSTANT, "constant"},
-		{INT, "3"},
+		{PUSH, "push"}, {CONSTANT, "constant"}, {INT, "2"},
+		{PUSH, "push"}, {CONSTANT, "constant"}, {INT, "3"},
 		{ADD, "add"},
 
 		{PUSH, "push"}, {STATIC, "static"}, {INT, "0"},
@@ -85,6 +85,10 @@ if_goto testline
 		{LABEL, "label"}, {IDENT, "testline"},
 		{GOTO, "goto"}, {IDENT, "testline"},
 		{IFGOTO, "if_goto"}, {IDENT, "testline"},
+
+		{FUNCTION, "function"}, {IDENT, "hoge"}, {INT, "1"},
+		{RETURN, "return"},
+		{CALL, "call"}, {IDENT, "hoge"}, {INT, "2"},
 
 		{EOF, ""},
 	}

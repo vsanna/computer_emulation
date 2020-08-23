@@ -234,7 +234,7 @@ func TestParser_parseLabelStatement(t *testing.T) {
 			t.Fatalf("[%d] statement.String() is wrong. expected = %q, actual = %q", i, test.expectedStatement, statement.String())
 		}
 
-		pushStatement, ok := statement.(vm_ast.LabelStatement)
+		pushStatement, ok := statement.(*vm_ast.LabelStatement)
 
 		if !ok {
 			t.Fatalf("failed to convert from Statement to LabelStatement. actual=%T", statement)
@@ -274,10 +274,10 @@ func TestParser_parseGotoStatement(t *testing.T) {
 			t.Fatalf("[%d] statement.String() is wrong. expected = %q, actual = %q", i, test.expectedStatement, statement.String())
 		}
 
-		pushStatement, ok := statement.(vm_ast.GotoStatement)
+		pushStatement, ok := statement.(*vm_ast.GotoStatement)
 
 		if !ok {
-			t.Fatalf("failed to convert from Statement to LabelStatement. actual=%T", statement)
+			t.Fatalf("failed to convert from Statement to GotoStatement. actual=%T", statement)
 		}
 
 		if pushStatement.Value.Literal != test.expectedValueLiteral {
@@ -314,10 +314,10 @@ func TestParser_parseIfGotoStatement(t *testing.T) {
 			t.Fatalf("[%d] statement.String() is wrong. expected = %q, actual = %q", i, test.expectedStatement, statement.String())
 		}
 
-		pushStatement, ok := statement.(vm_ast.IfGotoStatement)
+		pushStatement, ok := statement.(*vm_ast.IfGotoStatement)
 
 		if !ok {
-			t.Fatalf("failed to convert from Statement to LabelStatement. actual=%T", statement)
+			t.Fatalf("failed to convert from Statement to GotoStatement. actual=%T", statement)
 		}
 
 		if pushStatement.Value.Literal != test.expectedValueLiteral {
@@ -325,6 +325,46 @@ func TestParser_parseIfGotoStatement(t *testing.T) {
 		}
 		if pushStatement.Value.Type != test.expectedValueType {
 			t.Fatalf("unexpected value. expected=%q, actual=%q", test.expectedValueType, pushStatement.Value.Type)
+		}
+
+	}
+}
+
+func TestParser_parseFunctionName(t *testing.T) {
+	tests := []struct {
+		input                string
+		expectedStatement    string
+		expectedValueLiteral string
+		expectedValueType    vm_tokenizer.TokenType
+	}{
+		{"function func 100", "FUNCTION func 100", "100", vm_tokenizer.INT},
+		{"function func hoge", "FUNCTION func hoge", "hoge", vm_tokenizer.IDENT},
+	}
+	for i, test := range tests {
+		tokenizer := vm_tokenizer.New(test.input)
+		parser := New(tokenizer)
+		program := parser.ParseProgram()
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements has more than 1 statement. got=%d", len(program.Statements))
+		}
+
+		statement := program.Statements[0]
+
+		if statement.String() != test.expectedStatement {
+			t.Fatalf("[%d] statement.String() is wrong. expected = %q, actual = %q", i, test.expectedStatement, statement.String())
+		}
+
+		pushStatement, ok := statement.(*vm_ast.FunctionStatement)
+
+		if !ok {
+			t.Fatalf("failed to convert from Statement to FunctionStatement. actual=%T", statement)
+		}
+
+		if pushStatement.LocalNum.Literal != test.expectedValueLiteral {
+			t.Fatalf("unexpected value. expected=%q, actual=%q", test.expectedValueLiteral, pushStatement.LocalNum.Literal)
+		}
+		if pushStatement.LocalNum.Type != test.expectedValueType {
+			t.Fatalf("unexpected value. expected=%q, actual=%q", test.expectedValueType, pushStatement.LocalNum.Type)
 		}
 
 	}

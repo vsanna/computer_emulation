@@ -18,7 +18,7 @@ func main() {
 func vmToAsm() {
 	filename := ""
 	if len(os.Args) == 1 {
-		filename = "./sample_vm/control_flow.vm"
+		filename = "./sample_vm/func.vm"
 	} else {
 		filename = os.Args[1]
 	}
@@ -40,7 +40,7 @@ func vmToAsm() {
 func asmToMachineCode() {
 	filename := ""
 	if len(os.Args) == 1 {
-		filename = "./sample_asm/control_flow.asm"
+		filename = "./sample_asm/func.asm"
 	} else {
 		filename = os.Args[1]
 	}

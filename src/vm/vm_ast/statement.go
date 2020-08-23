@@ -2,6 +2,7 @@ package vm_ast
 
 import (
 	"computer_emulation/src/vm/vm_tokenizer"
+	"strconv"
 )
 
 type Statement interface {
@@ -16,11 +17,18 @@ type PushStatement struct {
 	Line    int
 }
 
-func NewPushStatement() *PushStatement {
+func NewPushStatement(segmentName string, idx int) *PushStatement {
 	return &PushStatement{
-		Value:   vm_tokenizer.ZeroToken(),
-		Segment: vm_tokenizer.ZeroToken(),
+		Segment: vm_tokenizer.Token{Type: vm_tokenizer.IDENT, Literal: segmentName},
+		Value:   vm_tokenizer.Token{Literal: strconv.Itoa(idx), Type: vm_tokenizer.INT},
 	}
+}
+
+func NewZeroPushStatement() *PushStatement {
+	tmp := NewPushStatement("", -1)
+	tmp.Value = vm_tokenizer.ZeroToken()
+	tmp.Segment = vm_tokenizer.ZeroToken()
+	return tmp
 }
 
 func (a PushStatement) statement() {
@@ -224,6 +232,13 @@ type GotoStatement struct {
 	Line  int
 }
 
+func NewGotoStatement(label string, line int) *GotoStatement {
+	return &GotoStatement{
+		Value: vm_tokenizer.Token{Type: vm_tokenizer.IDENT, Literal: label},
+		Line:  line,
+	}
+}
+
 func (a GotoStatement) statement() {
 }
 
@@ -248,5 +263,54 @@ func (a IfGotoStatement) String() string {
 }
 
 func (a IfGotoStatement) LineNumber() int {
+	return a.Line
+}
+
+type FunctionStatement struct {
+	Name     vm_tokenizer.Token
+	LocalNum vm_tokenizer.Token
+	Line     int
+}
+
+func (a FunctionStatement) statement() {
+}
+
+func (a FunctionStatement) String() string {
+	return vm_tokenizer.FUNCTION + " " + a.Name.Literal + " " + a.LocalNum.Literal
+}
+
+func (a FunctionStatement) LineNumber() int {
+	return a.Line
+}
+
+type CallStatement struct {
+	Name   vm_tokenizer.Token
+	ArgNum vm_tokenizer.Token
+	Line   int
+}
+
+func (a CallStatement) statement() {
+}
+
+func (a CallStatement) String() string {
+	return vm_tokenizer.CALL + " " + a.Name.Literal + " " + a.ArgNum.Literal
+}
+
+func (a CallStatement) LineNumber() int {
+	return a.Line
+}
+
+type ReturnStatement struct {
+	Line int
+}
+
+func (a ReturnStatement) statement() {
+}
+
+func (a ReturnStatement) String() string {
+	return vm_tokenizer.RETURN
+}
+
+func (a ReturnStatement) LineNumber() int {
 	return a.Line
 }

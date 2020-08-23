@@ -206,12 +206,12 @@ func (cpu *Cpu) ShowDebugInfoForSegments() {
 	log.Printf("[DEBUG] THAT     = %v", thatSegment)
 	log.Printf("[DEBUG] STATIC   = %v", staticSegument)
 	log.Printf("[DEBUG] TEMP     = %v", tempSegment)
-	//
-	//dataMemoryHeadsSegment := []int{}
-	//for i := 0; i < 10; i++ {
-	//	dataMemoryHeadsSegment = append(dataMemoryHeadsSegment, cpu.data_memory.Pass(nil, OFF, bit.IntToBus(i)).ToInt())
-	//}
-	//log.Printf("[DEBUG] MEMORY    = %v", dataMemoryHeadsSegment)
+
+	dataMemoryHeadsSegment := []int{}
+	for i := 0; i < 10; i++ {
+		dataMemoryHeadsSegment = append(dataMemoryHeadsSegment, cpu.data_memory.Pass(nil, OFF, bit.IntToBus(i)).ToInt())
+	}
+	log.Printf("[DEBUG] MEMORY   = %v", dataMemoryHeadsSegment)
 }
 
 func (cpu *Cpu) ShowDebugInfoForOperation(address *Bus, isCommandA *Bit, opsBus *Bus, destBus *Bus, jumpBus *Bus) {

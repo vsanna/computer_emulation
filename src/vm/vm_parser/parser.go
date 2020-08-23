@@ -73,19 +73,19 @@ func (p *Parser) parseStatement() vm_ast.Statement {
 		return p.parseGotoStatement()
 	case vm_tokenizer.IFGOTO:
 		return p.parseIfGotoStatement()
-	//case vm_tokenizer.RETURN:
-	//	return p.parseReturnStatement()
-	//case vm_tokenizer.FUNCTION:
-	//	return p.parseFunctionStatement()
-	//case vm_tokenizer.CALL:
-	//	return p.parseCallStatement()
+	case vm_tokenizer.RETURN:
+		return p.parseReturnStatement()
+	case vm_tokenizer.FUNCTION:
+		return p.parseFunctionStatement()
+	case vm_tokenizer.CALL:
+		return p.parseCallStatement()
 	default:
 		return p.parseAssignmentStatement()
 	}
 }
 
 func (p *Parser) parsePushStatement() vm_ast.Statement {
-	statement := vm_ast.NewPushStatement()
+	statement := vm_ast.NewZeroPushStatement()
 
 	if !(p.peekTokenIs(vm_tokenizer.IDENT) ||
 		p.peekTokenIs(vm_tokenizer.INT) ||
@@ -294,5 +294,68 @@ func (p *Parser) parseIfGotoStatement() vm_ast.Statement {
 	p.currentLine += 1
 	p.nextToken()
 
+	return statement
+}
+
+func (p *Parser) parseReturnStatement() vm_ast.Statement {
+	// be in [return]
+	statement := &vm_ast.ReturnStatement{}
+	statement.Line = p.currentLine
+	p.currentLine += 1
+	p.nextToken()
+	return statement
+}
+
+func (p *Parser) parseFunctionStatement() vm_ast.Statement {
+	// be in [function] name lclNum
+	statement := &vm_ast.FunctionStatement{}
+
+	// move to function [name] lclNum
+	if !p.expectPeek(vm_tokenizer.IDENT) {
+		log.Fatalf("unexpected token. expected=%q, actual=%q", vm_tokenizer.IDENT, p.currentToken)
+	}
+	statement.Name = p.currentToken
+
+	if !(p.peekTokenIs(vm_tokenizer.IDENT) ||
+		p.peekTokenIs(vm_tokenizer.INT)) {
+		p.addError(fmt.Sprintf("unexpected token. actual=%q", p.currentToken.Type))
+		log.Error("parse error")
+		os.Exit(1)
+		return nil
+	}
+	// move to function name [lclnum]
+	p.nextToken()
+	statement.LocalNum = p.currentToken
+
+	statement.Line = p.currentLine
+	p.currentLine += 1
+	p.nextToken()
+	return statement
+}
+
+func (p *Parser) parseCallStatement() vm_ast.Statement {
+	// be in [call] name argNum
+	statement := &vm_ast.CallStatement{}
+
+	// move to call [name] argNum
+	if !p.expectPeek(vm_tokenizer.IDENT) {
+		log.Fatalf("unexpected token. expected=%q, actual=%q", vm_tokenizer.IDENT, p.currentToken)
+	}
+	statement.Name = p.currentToken
+
+	if !(p.peekTokenIs(vm_tokenizer.IDENT) ||
+		p.peekTokenIs(vm_tokenizer.INT)) {
+		p.addError(fmt.Sprintf("unexpected token. actual=%q", p.currentToken.Type))
+		log.Error("parse error")
+		os.Exit(1)
+		return nil
+	}
+	// move to call name [argNum]
+	p.nextToken()
+	statement.ArgNum = p.currentToken
+
+	statement.Line = p.currentLine
+	p.currentLine += 1
+	p.nextToken()
 	return statement
 }

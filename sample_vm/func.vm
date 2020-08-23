@@ -1,0 +1,32 @@
+push constant 100
+goto multiple_end
+function multiple 2
+    push argument 1
+    pop local 0
+    push constant 0
+    pop local 1
+    label multiple_if
+    push local 0
+    push constant 0
+    eq
+    if_goto multiple_if_then
+        push local 1
+        push argument 0
+        add
+        pop local 1
+        push local 0
+        push constant 1
+        sub
+        pop local 0
+        goto multiple_if
+    label multiple_if_then
+        push local 1
+        return
+label multiple_end
+push constant 2
+push constant 3
+call multiple 2
+push constant 4
+call multiple 2
+push constant 5
+call multiple 2

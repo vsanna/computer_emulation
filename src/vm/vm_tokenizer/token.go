@@ -46,9 +46,15 @@ const (
 	TEMP    = "TEMP"
 	STATIC  = "STATIC"
 
+	// control flow
 	LABEL  = "LABEL"
 	GOTO   = "GOTO"
 	IFGOTO = "IFGOTO"
+
+	// functiom
+	FUNCTION = "FUNCTION"
+	CALL     = "CALL"
+	RETURN   = "RETURN"
 )
 
 var keywords = map[string]TokenType{
@@ -74,6 +80,9 @@ var keywords = map[string]TokenType{
 	"if_goto":  IFGOTO,
 	"goto":     GOTO,
 	"label":    LABEL,
+	"function": FUNCTION,
+	"return":   RETURN,
+	"call":     CALL,
 }
 
 func LookupIdent(ident string) TokenType {

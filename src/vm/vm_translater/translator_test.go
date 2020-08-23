@@ -1669,7 +1669,7 @@ label end
 		{expectedLine: "D=A;", isRandom: false},
 		{expectedLine: "@SP", isRandom: false},
 		{expectedLine: "M=D;", isRandom: false},
-		{expectedLine: "@2", isRandom: false},
+		{expectedLine: "@10", isRandom: false},
 		{expectedLine: "D=A;", isRandom: false},
 		{expectedLine: "@SP", isRandom: false},
 		{expectedLine: "A=M;", isRandom: false},
@@ -3182,11 +3182,11 @@ label end
 	for i, line := range strings.Split(translatedLines, "\n") {
 		if tests[i].isRandom {
 			if !strings.Contains(line, "generated_ident__") {
-				t1.Fatalf("invalid translation. expected=%q, actual=%q", tests[i].expectedLine, line)
+				t1.Fatalf("[%d] invalid translation. expected=%q, actual=%q", i, tests[i].expectedLine, line)
 			}
 		} else {
 			if line != tests[i].expectedLine {
-				t1.Fatalf("invalid translation. expected=%q, actual=%q", tests[i].expectedLine, line)
+				t1.Fatalf("[%d] invalid translation. expected=%q, actual=%q", i, tests[i].expectedLine, line)
 			}
 		}
 	}
