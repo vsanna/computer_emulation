@@ -3,8 +3,8 @@ package translator
 import (
 	"computer_emulation/src/assembler/ast"
 	"computer_emulation/src/assembler/tokenizer"
-	"computer_emulation/src/bit"
-	"computer_emulation/src/memory"
+	"computer_emulation/src/hardware/bit"
+	"computer_emulation/src/hardware/memory"
 	"log"
 	"strconv"
 )

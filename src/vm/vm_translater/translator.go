@@ -1,7 +1,7 @@
 package vm_translater
 
 import (
-	"computer_emulation/src/memory"
+	"computer_emulation/src/hardware/memory"
 	"computer_emulation/src/vm/vm_ast"
 	"computer_emulation/src/vm/vm_tokenizer"
 	"github.com/google/uuid"
