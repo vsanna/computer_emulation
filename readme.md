@@ -62,46 +62,57 @@ This does 3things
     3. jump to the address current A registry has if jump is given
 
 ##### dest options
-ddd = 000 => dest is not given.
-ddd = 100 => dest is A
-ddd = 010 => dest is D
-ddd = 001 => dest is M
-ddd = 110 => dest is AD(A and D)
-ddd = 011 => dest is DM(D and M)
-ddd = 101 => dest is AM(A and M)
-ddd = 111 => dest is ADM(A, D and M)
+| ddd | desc                    | 
+|-----|-------------------------| 
+| 000 | dest is not given.      | 
+| 100 | dest is A               | 
+| 010 | dest is D               | 
+| 001 | dest is M               | 
+| 110 | dest is AD(A and D)     | 
+| 011 | dest is DM(D and M)     | 
+| 101 | dest is AM(A and M)     | 
+| 111 | dest is ADM(A, D and M) | 
+
+
 
 ##### comp options 
 we have 18 comp options. It's corresponding to ALU's operationCodes.
 blank cells are not defined
-cccccc = 101010 => (a=0) 0   / (a=1) 
-cccccc = 111111 => (a=0) 1   / (a=1)
-cccccc = 111010 => (a=0) -1  / (a=1)
-cccccc = 001100 => (a=0) D   / (a=1)
-cccccc = 110000 => (a=0) A   / (a=1) M
-cccccc = 001101 => (a=0) !D  / (a=1)
-cccccc = 110001 => (a=0) !A  / (a=1) !M
-cccccc = 001111 => (a=0) -D  / (a=1)
-cccccc = 110011 => (a=0) -A  / (a=1) -M
-cccccc = 011111 => (a=0) D+1 / (a=1)
-cccccc = 110111 => (a=0) A+1 / (a=1) M+1
-cccccc = 001110 => (a=0) D-1 / (a=1)
-cccccc = 110010 => (a=0) A-1 / (a=1) M-1
-cccccc = 000010 => (a=0) D+A / (a=1) D+M
-cccccc = 010011 => (a=0) D-A / (a=1) D-M
-cccccc = 000111 => (a=0) A-D / (a=1) M-D
-cccccc = 000000 => (a=0) D&A / (a=1) D&M
-cccccc = 010101 => (a=0) D|A / (a=1) D|M
+
+| cccccc | a=0  | a=1  | 
+|--------|------|------| 
+| 101010 | 0    |      | 
+| 111111 | 1    |      | 
+| 111010 | -1   |      | 
+| 001100 | D    |      | 
+| 110000 | A    | M    | 
+| 001101 | !D   |      | 
+| 110001 | !A   | !M   | 
+| 001111 | -D   |      | 
+| 110011 | -A   | -M   | 
+| 011111 | D+1  |      | 
+| 110111 | A+1  | M+1  | 
+| 001110 | D-1  |      | 
+| 110010 | A-1  | M-1  | 
+| 000010 | D+A  | D+M  | 
+| 010011 | D-A  | D-M  | 
+| 000111 | A-D  | M-D  | 
+| 000000 | D&A  | D&M  | 
+| 010101 | D\|A | D\|M | 
+
 
 ##### jump options
-jjj = 000 => no jump
-jjj = 001 => JGT. jump if A reg > 0
-jjj = 010 => JEQ. jump if A reg == 0
-jjj = 011 => JGE. jump if A reg >= 0
-jjj = 100 => JLT. jump if A reg < 0
-jjj = 101 => JNE. jump if A reg != 0
-jjj = 110 => JLE. jump if A reg <= 0
-jjj = 111 => JMP. jump anyway
+| jjj | desc                    | 
+|-----|-------------------------| 
+| 000 | no jump                 | 
+| 001 | JGT. jump if A reg > 0  | 
+| 010 | JEQ. jump if A reg == 0 | 
+| 011 | JGE. jump if A reg >= 0 | 
+| 100 | JLT. jump if A reg < 0  | 
+| 101 | JNE. jump if A reg != 0 | 
+| 110 | JLE. jump if A reg <= 0 | 
+| 111 | JMP. jump anyway        | 
+
 
 ## spec of assembler layer
 assembler syntax is corresponding to the spec of hardware layer.
