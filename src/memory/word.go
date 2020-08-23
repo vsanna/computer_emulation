@@ -3,7 +3,6 @@ package memory
 import (
 	"computer_emulation/src/bit"
 	. "computer_emulation/src/bit"
-	"fmt"
 	"log"
 	"strconv"
 )
@@ -39,7 +38,9 @@ func (word *Word) Pass(in *Bus, load *Bit) *Bus {
 // for loading binary code in memory.
 func (word *Word) Load(instruction string) {
 	if len(instruction) != WORD_WIDTH {
-		panic(fmt.Sprintf("instruction doesn't has proper length. bit length per one instruction should be %d", WORD_WIDTH))
+		log.Fatalf(
+			"instruction doesn't has proper length. bit length per one instruction should be %d, but got %d",
+			WORD_WIDTH, len(instruction))
 	}
 
 	log.Printf("[DEBUG] loading program: %s\n", instruction)

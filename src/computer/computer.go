@@ -27,7 +27,7 @@ func NewComputer() *Computer {
 	}
 	// place binary code in memory in advance
 	// but for convenience, calling assembler here instead of pasting binary code
-	program := assembler.New().FromFile("./sample_asm/func.asm")
+	program := assembler.New().FromFile("./sample_asm/preset.asm")
 	LoadPresetBinaryProgram(computer)(program)
 
 	return computer
@@ -57,7 +57,7 @@ func (computer *Computer) Run() {
 		// 3. update user output
 
 		// 4. for debugging:
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 	}
 }
 

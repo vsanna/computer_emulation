@@ -87,8 +87,8 @@ func (memory *Memory) Pass(in *Bus, load *Bit, address *Bus) *Bus {
 }
 
 // This simulates ROM by loading machine language program from text file.
-func (memory *Memory) LoadExecutable(machine_lang_program string) {
-	lines := strings.Split(machine_lang_program, "\n")
+func (memory *Memory) LoadExecutable(binaryProgram string) {
+	lines := strings.Split(strings.TrimSpace(binaryProgram), "\n")
 
 	maxProgramLineNum := (MEMORY_SIZE)
 	if len(lines) > maxProgramLineNum {

@@ -12,9 +12,9 @@ import (
 func main() {
 	//vmToAsm()
 	//asmToMachineCode()
-	//runMachine()
+	runMachine()
 
-	runMachineFromVmCode() // for convenience
+	//runMachineFromVmCode() // for convenience
 }
 
 func vmToAsm() {
@@ -42,7 +42,7 @@ func vmToAsm() {
 func asmToMachineCode() {
 	filename := ""
 	if len(os.Args) == 1 {
-		filename = "./sample_asm/func.asm"
+		filename = "./sample_asm/sum_up_to_10.asm"
 	} else {
 		filename = os.Args[1]
 	}
