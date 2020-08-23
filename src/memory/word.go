@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-// 1word = 2Byte. 32bitマシンは4B
+// This architecture uses 16bits-bus, so the word size is 2 bytes.
 const WORD_WIDTH = 16
 
 type Word struct {
@@ -36,19 +36,7 @@ func (word *Word) Pass(in *Bus, load *Bit) *Bus {
 	return out
 }
 
-// NOTE: 実際には一つ前のtickでinした値を再現するための関数
-func (word *Word) GetPrevious() *Bus {
-	return word.Pass(nil, OFF)
-}
-
-func (word *Word) String() string {
-	str := ""
-	for idx, _ := range word.registers {
-		str += word.registers[idx].String()
-	}
-	return str
-}
-
+// for loading binary code in memory.
 func (word *Word) Load(instruction string) {
 	if len(instruction) != WORD_WIDTH {
 		panic(fmt.Sprintf("instruction doesn't has proper length. bit length per one instruction should be %d", WORD_WIDTH))
@@ -64,4 +52,18 @@ func (word *Word) Load(instruction string) {
 
 		word.registers[idx].dff.Pass(bit.ToBit((int)(b)))
 	}
+}
+
+// For convenience to debug.
+func (word *Word) GetPrevious() *Bus {
+	return word.Pass(nil, OFF)
+}
+
+// For convenience to debug.
+func (word *Word) String() string {
+	str := ""
+	for idx, _ := range word.registers {
+		str += word.registers[idx].String()
+	}
+	return str
 }

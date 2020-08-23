@@ -10,12 +10,11 @@ import (
 	"time"
 )
 
-// ≒ mother board(circuit basis)
+// ≒ mother board(circuit basis), which has cpu and memories on it.
 type Computer struct {
 	data_memory    *memory.Memory
 	program_memory *memory.Memory // ROM
 	cpu            *cpu.Cpu
-	assm           *assembler.Assembler
 }
 
 func NewComputer() *Computer {
@@ -25,14 +24,17 @@ func NewComputer() *Computer {
 		data_memory:    data_memory,
 		program_memory: program_memory,
 		cpu:            cpu.NewCpu(data_memory, program_memory),
-		assm:           assembler.New(),
 	}
 	// place binary code in memory in advance
 	// but for convenience, calling assembler here instead of pasting binary code
 	program := assembler.New().FromFile("./sample_asm/func.asm")
-	computer.program_memory.LoadExecutable(program)
+	LoadPresetBinaryProgram(computer)(program)
 
 	return computer
+}
+
+func LoadPresetBinaryProgram(computer *Computer) func(machine_lang_program string) {
+	return computer.program_memory.LoadExecutable
 }
 
 func (computer *Computer) Run() {
@@ -42,7 +44,7 @@ func (computer *Computer) Run() {
 	for {
 		// 1. update user input
 		// simulate RESET action by checking whether reset.txt exists or not
-		// TODO: これをbitで扱うべきか
+		// TODO: consider whether to use resetInput as Bit type or not.
 		resetInput := OFF
 		_, err := os.Stat("reset.txt")
 		if err == nil {
@@ -59,8 +61,8 @@ func (computer *Computer) Run() {
 	}
 }
 
-// TODO: 図をここに貼る
-// TODO: debugコードをflagで出し分け
+// TODO: write and paste architecture diagram here
+// TODO: control debug mode by flagging
 func (computer *Computer) ticktack(reset *Bit) {
 	computer.cpu.ShowDebugInfoForStatus()
 	pcAddress, resetBit := computer.cpu.StartTicktack(reset)

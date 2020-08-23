@@ -5,8 +5,6 @@ import (
 	. "computer_emulation/src/bit"
 )
 
-// 1word相当のデータのカウント処理を行う論理ゲート.
-// PCは都度ここに問い合わせして新しい値を取得する
 type Counter struct {
 	word        *Word
 	load        *RegisterCell

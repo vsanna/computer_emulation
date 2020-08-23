@@ -19,9 +19,9 @@ type Parser struct {
 func New(tokenizer *vm_tokenizer.Tokenizer) *Parser {
 	p := &Parser{tokenizer: tokenizer}
 	p.errors = []string{}
-	// 初期化
-	p.nextToken() // peekTokenに一個目
-	p.nextToken() // peekTokenに二個目, currentTokenに一個目
+	// initialize
+	p.nextToken() // set first token in peekToken
+	p.nextToken() // set second token in peekToken adn first token in currentToken
 	return p
 }
 

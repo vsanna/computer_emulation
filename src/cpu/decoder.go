@@ -14,6 +14,9 @@ func NewDecoder() *Decoder {
 	return &Decoder{multibit_multi_plexer: gate.NewMultibitMultiPlexer(), not: gate.NewNot()}
 }
 
+// parse an instruction(16bit) into (atValue | isCommandA, opsBus, destBus, jumpBus)
+// Acommand: 0vvvvvvvvvvvvvvv
+// Bcommand: 111accccccdddjjj
 func (decoder *Decoder) Pass(in *Bus) (
 	isCommandA *Bit,
 	address *Bus,
@@ -21,7 +24,6 @@ func (decoder *Decoder) Pass(in *Bus) (
 	destBus *Bus,
 	jumpBus *Bus,
 ) {
-	// 先頭1bitのみで決定
 	isCommandA = decoder.not.Pass(in.Bits[0])
 
 	address = NewBus(BusOption{
@@ -45,9 +47,9 @@ func (decoder *Decoder) Pass(in *Bus) (
 		},
 	})
 
-	// C命令(Aレジスタへの値の格納)の場合は[4,9]までを使う。
-	// その使うパスだけを先頭に寄せる処理。
-	// A命令の場合は何も使わない
+	// Ccommands use [4,9] bits of the instruction as operationCode(for ALU)
+	// Acommands doesn't need operationCode
+	// Here, move the operationCode to the head
 	opsBus = decoder.multibit_multi_plexer.Pass(
 		NewBus(BusOption{}),
 		NewBus(BusOption{

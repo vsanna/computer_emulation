@@ -29,8 +29,9 @@ func NewAlu() *Alu {
 	}
 }
 
-// ALUは16bitの入力2系統に、6つのflagを入力として受け取る
-// 理論的には2**6 = 64通りの演算を行えるが、サポートするのはそのうち18種類とする(このhardwareでは。)
+// ALU has 2 16bit buses and 6 flags as input
+// theoritically, it can do calculation in 2**6 = 64 ways,
+// but it supports only 18ways as this hardware's specification.
 func (alu *Alu) Pass(
 	a *Bus, b *Bus,
 	zerox *Bit, negatex *Bit,
@@ -72,7 +73,7 @@ func (alu *Alu) Pass(
 	)
 
 	// outputIsZero
-	// Orを16(15)使い1Bitの出力にまとめ上げる
+	// consolidate 16bit bus into 1bit
 	outputIsZero = alu.not_single_bit.Pass(alu.or16To1.Pass(out))
 
 	// outputIsNegative

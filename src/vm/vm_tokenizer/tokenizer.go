@@ -68,12 +68,12 @@ func (l *Tokenizer) NextToken() Token {
 		}
 	}
 
-	// 1byteのtokenのみの前提.
+	// assuming the vm handles only 1byte characters
 	l.readChar()
 	return tok
 }
 
-// pos = 0のとき、次のcharをpeek
+// when pos = 0, peek next char
 func (l *Tokenizer) peekChar(pos int) byte {
 	if l.readPosition+pos >= len(l.input) {
 		return 0
@@ -82,9 +82,9 @@ func (l *Tokenizer) peekChar(pos int) byte {
 	}
 }
 
+// IDENT is consisted of characters isLetter supports
 func (l *Tokenizer) readIdentifier() string {
 	position := l.position
-	// 英字のみからなる文字列を読み進める
 	for isLetter(l.ch) {
 		l.readChar()
 	}

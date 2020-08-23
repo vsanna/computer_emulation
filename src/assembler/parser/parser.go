@@ -17,9 +17,9 @@ type Parser struct {
 func New(tokenizer *tokenizer.Tokenizer) *Parser {
 	p := &Parser{tokenizer: tokenizer}
 	p.errors = []string{}
-	// 初期化
-	p.nextToken() // peekTokenに一個目
-	p.nextToken() // peekTokenに二個目, currentTokenに一個目
+	// initialize
+	p.nextToken() // set first token in peekToken(currentToken is not set yet)
+	p.nextToken() // set second token in peekToken and first token in currentToken
 	return p
 }
 
@@ -132,7 +132,7 @@ func (p *Parser) parseAddressTaggingStatement() ast.Statement {
 	return statement
 }
 
-// TODO: try to parse expressions
+// In asm layer, limited number of instructions is allowed, so parsing expressions is not needed.
 func (p *Parser) parseOpsAndJumpStatement() ast.Statement {
 	// be in [D]=M+1;JMP
 	statement := &ast.OpsAndJumpStatement{}

@@ -13,9 +13,9 @@ func NewComp() *Comp {
 	return &Comp{multibit_multi_plexer: gate.NewMultibitMultiPlexer()}
 }
 
-// inのうち、先頭7桁のみ = opsBus利用する
-// opsBusの内容に応じて、入力ソースをnull(0), A, D, Mの4つのうちから2つ選択する
-// ALUに応じた処理flagをopsCodeBusとして取得
+// use only heading 7bit of in bus.(since a comp part is composed of 7bit of an instruction)
+// according to the comp part, choose 2 input source from D + (A or M)
+// and retrieve operationCode(6bits) which is based on ALU spec.
 func (dest *Comp) Pass(
 	a_reg_bus *Bus,
 	d_reg_bus *Bus,
@@ -31,6 +31,7 @@ func (dest *Comp) Pass(
 		a_reg_bus,
 		in.Bits[0],
 	)
+
 	operationCode = NewBus(BusOption{
 		Bits: []int{
 			in.Bits[1].GetVal(),

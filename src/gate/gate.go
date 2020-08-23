@@ -1,7 +1,6 @@
 package gate
 
-// 入出力がそれぞれ微妙に異なるからなぁ
-// TODO: goにマーカーメソッド的なものあるのかな
+// marker interface
 type Gate interface {
 	AsGate() bool
 }

@@ -218,8 +218,6 @@ func TestTokenizer_NextToken2(t *testing.T) {
 	M=A|D;
 	M=D|M;
 `
-	//AとMの演算子はない。
-
 	tokenizer := New(input)
 
 	tests := []struct {

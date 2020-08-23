@@ -24,6 +24,7 @@ func (a Assembler) FromString(assemblerCode string) string {
 	return t2.Translate()
 }
 
+// for convenience
 func (a Assembler) FromFile(filepath string) string {
 	filecontent, err := ioutil.ReadFile(filepath)
 	if err != nil {

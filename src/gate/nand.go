@@ -5,7 +5,7 @@ import (
 	. "computer_emulation/src/bit"
 )
 
-/*所与のロジック*/
+// nand is provided. this is one of the two physical basis.
 type Nand struct{}
 
 func NewNand() *Nand {

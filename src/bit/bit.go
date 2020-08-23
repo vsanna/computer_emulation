@@ -84,7 +84,6 @@ func (bus *Bus) String() string {
 	return output
 }
 
-// TODO: より高速な方法あるかも
 func (bus *Bus) Equals(other *Bus) bool {
 	for idx, _ := range bus.Bits {
 		if bus.Bits[idx].GetVal() != other.Bits[idx].GetVal() {

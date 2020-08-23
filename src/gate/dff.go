@@ -5,7 +5,7 @@ import (
 	. "computer_emulation/src/bit"
 )
 
-/*所与のロジック*/
+// dff is provided. this is one of the two physical basis.
 type Dff struct {
 	previousBit *Bit
 }
@@ -15,7 +15,6 @@ func (gate *Dff) GetPreviousBit() *Bit {
 }
 
 func NewDff() *Dff {
-	// TODO: registryのデフォ値はonだったような気がする(CPUの創り方を再読)
 	return &Dff{previousBit: bit.OFF}
 }
 

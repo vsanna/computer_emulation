@@ -10,12 +10,6 @@ import (
 	"log"
 )
 
-/*register
-address
-data: 1 - 10
-pc
-*/
-
 type Cpu struct {
 	data_memory           *memory.Memory
 	program_memory        *memory.Memory // ROM
@@ -53,25 +47,26 @@ func (cpu *Cpu) StartTicktack(reset *Bit) (*Bus, *Bit) {
 }
 
 // TODO: refactoring
+// an instruction goes through CPU and that updates registers and memory.
 func (cpu *Cpu) Pass(in *Bus, resetBit *Bit) {
-	// 1. decode
-	isCommandA, address, opsBus, destBus, jumpBus := cpu.decode(in)
-	//cpu.ShowDebugInfoForOperation(address, isCommandA, opsBus, destBus, jumpBus)
+	// 1. decode instruction
+	// instruction -> (atValue | isCommandA, opsBus, destBus, jumpBus)
+	isCommandA, atValue, opsBus, destBus, jumpBus := cpu.decode(in)
+	// cpu.ShowDebugInfoForOperation(atValue, isCommandA, opsBus, destBus, jumpBus)
 
-	// 2-1. commandA: update A register
-	cpu.a_reg.Pass(address, isCommandA)
+	// 2-1. (if isCommandA) update A register as A-command
+	cpu.a_reg.Pass(atValue, isCommandA)
 
+	// 2-2. (if !isCommandA) update registers/memories as B-command
 	// 2-2-1. commandB: prepare commandB
-	// opsBusの内容に応じて、入力ソースをnull(0), A, D, Mの4つのうちから2つ選択する
-	// ALUに応じた処理flagをopsCodeBusとして取得
 	xBus, yBus, opsCodeBus := cpu.comp.Pass(
 		cpu.a_reg.Pass(nil, OFF),
 		cpu.d_reg.Pass(nil, OFF),
 		cpu.data_memory.Pass(nil, OFF, cpu.a_reg.Pass(nil, OFF)),
 		opsBus,
 	)
-	// 2-2-2. commandB: calculation
-	// 2つの入力系統と、6つのflag
+	// 2-2-2. commandB: retrieve alu result
+	// passing 2 16bit bus and 6 flags as input
 	aluOutput, outputIsZero, outputIsNegative := cpu.alu.Pass(
 		xBus,
 		yBus,
@@ -89,7 +84,7 @@ func (cpu *Cpu) Pass(in *Bus, resetBit *Bit) {
 	cpu.a_reg.Pass(aluOutput, loadA)
 	cpu.d_reg.Pass(aluOutput, loadD)
 
-	// 2-3. update pc
+	// 2-3. update pc registry
 	cpu.pc_reg.Pass(
 		cpu.jump.Pass(
 			cpu.a_reg.Pass(nil, OFF),
@@ -144,12 +139,12 @@ func (cpu *Cpu) ShowDebugInfoForGlobalStack() {
 	for i := start; i <= end; i++ {
 		globalStack = append(globalStack, cpu.data_memory.Pass(nil, OFF, bit.IntToBus(i)).ToInt())
 	}
-	// NOTE: least pos is always 0 since it's where new val will come in.
+	// NOTE: last pos is always 0 since it's where new val comes in.
 	log.Printf("[DEBUG] GlobalStack = %v", globalStack)
 }
 
 // NOTE:
-// this/that/argument/localはbase addressから+5まで
+// this/that/argument/local: [base address, base address+5]
 // static/temp/pointer
 func (cpu *Cpu) ShowDebugInfoForSegments() {
 	localSegment := []int{
