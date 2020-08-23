@@ -55,7 +55,7 @@ func (computer *Computer) Run() {
 		// 3. update user output
 
 		// 4. for debugging:
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
