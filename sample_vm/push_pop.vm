@@ -1,0 +1,39 @@
+push constant 1010
+pop pointer 0
+push constant 1020
+pop pointer 1
+
+push constant 100
+push constant 200
+push constant 300
+pop this 0
+pop this 1
+pop this 2
+
+push constant 100
+push constant 200
+push constant 300
+pop that 0
+pop that 1
+pop that 2
+
+push constant 10
+push constant 20
+push constant 30
+pop static 0
+pop static 1
+pop static 2
+
+push constant 10
+push constant 20
+push constant 30
+pop temp 2
+pop temp 1
+pop temp 0
+
+push 1
+push 2
+push 3
+pop constant 0
+pop constant 0
+pop constant 0

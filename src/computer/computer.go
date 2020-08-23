@@ -7,7 +7,6 @@ import (
 	"computer_emulation/src/memory"
 	"log"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -28,39 +27,17 @@ func NewComputer() *Computer {
 		cpu:            cpu.NewCpu(data_memory, program_memory),
 		assm:           assembler.New(),
 	}
+	// place binary code in memory in advance
+	// but for convenience, calling assembler here instead of pasting binary code
+	program := assembler.New().FromFile("./sample_asm/func.asm")
+	computer.program_memory.LoadExecutable(program)
 
 	return computer
 }
 
 func (computer *Computer) Run() {
 	log.Printf("[HARDWARE] computer starts running....\n")
-	// 1. place binary code in memory.
-	// the first line(memory[0]) is a booting process.
-	program := strings.TrimSpace(`
-0000000000010000
-1110111111001000
-0000000000010001
-1110101010001000
-0000000000010000
-1111110000010000
-0000000000000101
-1110010011010000
-0000000000010010
-1110001100000001
-0000000000010000
-1111110000010000
-0000000000010001
-1111000010001000
-0000000000010000
-1111110111001000
-0000000000000100
-1110101010000111
-0000000000010010
-1110101010000111
-`)
-	computer.program_memory.LoadExecutable(program)
 
-	// 2. run
 	// use infinite loop instead of clock
 	for {
 		// 1. update user input
@@ -78,7 +55,7 @@ func (computer *Computer) Run() {
 		// 3. update user output
 
 		// 4. for debugging:
-		time.Sleep(100 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 

@@ -3,7 +3,6 @@ package parser
 import (
 	"computer_emulation/src/assembler/ast"
 	"computer_emulation/src/assembler/tokenizer"
-	"log"
 	"strconv"
 	"strings"
 	"testing"
@@ -36,12 +35,13 @@ func TestParser_ParseProgram_LineNumber(t *testing.T) {
 	@DMAN
 	@ADMA
 	M=M+1;
+	@SP
 `
 	t2 := tokenizer.New(input)
 	parser := New(t2)
 	program := parser.ParseProgram()
-	if len(program.Statements) != 25 {
-		t.Fatalf("program.Statements doesn't have 25 statements. got=%d", len(program.Statements))
+	if len(program.Statements) != 26 {
+		t.Fatalf("program.Statements doesn't have 26 statements. got=%d", len(program.Statements))
 	}
 
 	tests := []struct {
@@ -72,6 +72,9 @@ func TestParser_ParseProgram_LineNumber(t *testing.T) {
 		{expectedLineNumber: 20},
 		{expectedLineNumber: 21},
 		{expectedLineNumber: 22},
+		{expectedLineNumber: 23},
+		{expectedLineNumber: 24},
+		{expectedLineNumber: 25},
 	}
 
 	for i, statement := range program.Statements {
@@ -92,6 +95,7 @@ func TestParser_ParseProgram_AllocationStatement(t *testing.T) {
 		{"@LOOP", "@LOOP", "LOOP", tokenizer.IDENT},
 		{"@END", "@END", "END", tokenizer.IDENT},
 		{"@100", "@100", "100", tokenizer.INT},
+		{"@SP", "@SP", "SP", tokenizer.IDENT},
 	}
 	for _, test := range tests {
 		tokenizer := tokenizer.New(test.input)
@@ -108,8 +112,6 @@ func TestParser_ParseProgram_AllocationStatement(t *testing.T) {
 		}
 
 		allocStatement, ok := statement.(*ast.AllocationStatement)
-
-		log.Print(allocStatement.String())
 
 		if !ok {
 			t.Fatalf("failed to convert from Statement to AllocationStatement. actual=%T", statement)
@@ -156,8 +158,6 @@ func TestParser_ParseProgram_AddressTaggingStatement(t *testing.T) {
 		}
 
 		taggingStatement, ok := statement.(*ast.AddressTaggingStatement)
-
-		log.Print(taggingStatement.String())
 
 		if !ok {
 			t.Fatalf("failed to convert from Statement to AllocationStatement. actual=%T", statement)

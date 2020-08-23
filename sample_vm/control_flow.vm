@@ -1,0 +1,23 @@
+push constant 1
+if_goto else_a
+push constant 100
+goto end_a
+label else_a
+push constant 200
+label end_a
+
+push constant 0
+if_goto else_b
+push constant 100
+goto end_b
+label else_b
+push constant 200
+label end_b
+
+push constant 10
+if_goto else_c
+push constant 100
+goto end_c
+label else_c
+push constant 200
+label end_c
