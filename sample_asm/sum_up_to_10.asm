@@ -1,0 +1,17 @@
+@i
+M=10;
+@sum=0;
+(LOOP)
+    @sum
+    D=M;
+    @i;
+    D=A+D;
+    @sum
+    M=D;
+    @i 
+    D=A;
+    @END
+    D;JEQ
+    @LOOP
+    0;JMP
+(END)
