@@ -44,12 +44,12 @@ func TestTranslator_Translate(t1 *testing.T) {
 	tests := []struct {
 		expectedLine string
 	}{
-		{expectedLine: "0000000000010000"}, // 最初の変数はアドレス16にマッピングされる
-		{expectedLine: "1110111111001000"}, // 111 0 111111 001 000
-		{expectedLine: "0000000000010001"}, // ２つ目の変数はアドレス17にマッピングされる
-		{expectedLine: "1110101010001000"}, // 111 0 101010 001 000
-		{expectedLine: "1110001100000111"}, // 111 0 001100 000 111
-		{expectedLine: "1111000000111101"}, // 111 1 000000 111 101
+		{expectedLine: "0000000000010000"},
+		{expectedLine: "1110111111001000"},
+		{expectedLine: "0000000000010001"},
+		{expectedLine: "1110101010001000"},
+		{expectedLine: "1110001100000111"},
+		{expectedLine: "1111000000111101"},
 
 		{expectedLine: "0000000000000000"},
 		{expectedLine: "0000000000000001"},

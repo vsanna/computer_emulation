@@ -1,0 +1,47 @@
+// This vm script will calculate 123 + 1*2*3*4
+push constant 123
+goto multiple_end
+function multiple 2
+    // local[0]: i = arg[1]
+    push argument 1
+    pop local 0
+
+    // local[0]: sum = 0
+    push constant 0
+    pop local 1
+
+    // this does for-loop virtually
+    // label multiple_of
+    // if (i == 0) {
+    //   return sum
+    // } else {
+    //   sum = sum + arg[0]
+    //   i = i - 1
+    //   goto multiple_if
+    //}
+    label multiple_if
+    push local 0
+    push constant 0
+    eq
+    if_goto multiple_if_then
+        push local 1
+        push argument 0
+        add
+        pop local 1
+        push local 0
+        push constant 1
+        sub
+        pop local 0
+        goto multiple_if
+    label multiple_if_then
+        push local 1
+        return
+label multiple_end
+push constant 1
+push constant 2
+call multiple 2
+push constant 3
+call multiple 2
+push constant 4
+call multiple 2
+add

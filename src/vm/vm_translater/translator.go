@@ -1,7 +1,7 @@
 package vm_translater
 
 import (
-	"computer_emulation/src/memory"
+	"computer_emulation/src/hardware/memory"
 	"computer_emulation/src/vm/vm_ast"
 	"computer_emulation/src/vm/vm_tokenizer"
 	"github.com/google/uuid"
@@ -29,7 +29,7 @@ func New(program *vm_ast.Program) *Translator {
 
 func (t *Translator) Translate() string {
 	// 1. build environment map
-	// TODO: 不要
+	// TODO: maybe this is unneeded.
 	t.buildEnvironment()
 
 	// 2. evaluate statements
@@ -527,8 +527,9 @@ func (t *Translator) translateIfGotoStatement(stmt *vm_ast.IfGotoStatement) []st
 		"A=M-1;",
 		"D=M;",
 		"@" + stmt.Value.Literal,
-		// 1のみtrue. それ以外はfalse
-		"D-1;JEQ", //if_goto文を呼ぶ前にDにcondをセットしておく。それが1 <=> D-1 == 0
+		// 1 is true, non1 is false
+		// set cond in D before calling if_goto statement
+		"D-1;JEQ",
 	}
 }
 
@@ -580,18 +581,16 @@ func (t *Translator) translateReturnStatement(stmt *vm_ast.ReturnStatement) []st
 		"M=D+1;",
 		// FRAME = LCL
 		"@LCL",
-		"D=M;", // このときA=1, M[A=1] = 263 = 255 + 8. expected
+		"D=M;",
 		"@" + frameBaseAddressLabel,
 		"M=D;",
 		// ReturnAddress = M[FRAME-5]
-		//"@" + frameBaseAddressLabel, // TODO: can remove this line
-		//"D=A;",
 		"@5",
 		"D=D-A;",
 		"A=D;",
 		"D=M;",
 		"@" + returnAddressLabel,
-		"M=D;", // これいくつ？
+		"M=D;",
 		// ARG = M[FRAME-4]
 		"@" + frameBaseAddressLabel,
 		"D=A;",
@@ -795,7 +794,7 @@ func (t *Translator) popAndSetToStatements(registerName string) []string {
 		"A=M;",
 		"D=M;",
 		"@" + registerName,
-		"M=D;", // @{R5}にDを保持
+		"M=D;", // store D val in M[R5]
 		// M[M[SP]] = 0
 		"@SP",
 		"A=M;",

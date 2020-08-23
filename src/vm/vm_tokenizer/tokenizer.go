@@ -1,5 +1,7 @@
 package vm_tokenizer
 
+import "strings"
+
 type Tokenizer struct {
 	input        string
 	position     int
@@ -8,9 +10,30 @@ type Tokenizer struct {
 }
 
 func New(input string) *Tokenizer {
-	t := &Tokenizer{input: input}
+	// remove comments
+	inputWithoutComments := withoutComment(input)
+	t := &Tokenizer{input: inputWithoutComments}
 	t.readChar()
 	return t
+}
+
+func withoutComment(input string) string {
+	result := ""
+	lines := strings.Split(input, "\n")
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		if len(trimmedLine) == 0 {
+			continue
+		}
+
+		lineWithoutComment := strings.Split(trimmedLine, "//")[0]
+
+		if len(lineWithoutComment) == 0 {
+			continue
+		}
+		result += lineWithoutComment + "\n"
+	}
+	return result
 }
 
 func (l *Tokenizer) readChar() {
@@ -45,12 +68,12 @@ func (l *Tokenizer) NextToken() Token {
 		}
 	}
 
-	// 1byteのtokenのみの前提.
+	// assuming the vm handles only 1byte characters
 	l.readChar()
 	return tok
 }
 
-// pos = 0のとき、次のcharをpeek
+// when pos = 0, peek next char
 func (l *Tokenizer) peekChar(pos int) byte {
 	if l.readPosition+pos >= len(l.input) {
 		return 0
@@ -59,9 +82,9 @@ func (l *Tokenizer) peekChar(pos int) byte {
 	}
 }
 
+// IDENT is consisted of characters isLetter supports
 func (l *Tokenizer) readIdentifier() string {
 	position := l.position
-	// 英字のみからなる文字列を読み進める
 	for isLetter(l.ch) {
 		l.readChar()
 	}

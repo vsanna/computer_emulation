@@ -12,7 +12,7 @@ func (t *Token) IsZero() bool {
 }
 
 const (
-	ZERO_VAL = "ZERO_VAL" // ゼロ値用
+	ZERO_VAL = "ZERO_VAL" // for zero value.
 	IDENT    = "IDENT"
 	ILLEGAL  = "ILLEGAL"
 
@@ -35,13 +35,14 @@ const (
 	NOT = "NOT"
 	NEG = "NEG"
 
+	// segment
 	CONSTANT = "CONSTANT"
-	// dynamic
+	//// dynamic
 	LOCAL    = "LOCAL"
 	ARGUMENT = "ARGUMENT"
 	THIS     = "THIS"
 	THAT     = "THAT"
-	// static
+	//// static
 	POINTER = "POINTER"
 	TEMP    = "TEMP"
 	STATIC  = "STATIC"
@@ -51,7 +52,7 @@ const (
 	GOTO   = "GOTO"
 	IFGOTO = "IFGOTO"
 
-	// functiom
+	// function
 	FUNCTION = "FUNCTION"
 	CALL     = "CALL"
 	RETURN   = "RETURN"
