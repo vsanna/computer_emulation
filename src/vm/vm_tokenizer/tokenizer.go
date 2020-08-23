@@ -1,5 +1,7 @@
 package vm_tokenizer
 
+import "strings"
+
 type Tokenizer struct {
 	input        string
 	position     int
@@ -8,9 +10,30 @@ type Tokenizer struct {
 }
 
 func New(input string) *Tokenizer {
-	t := &Tokenizer{input: input}
+	// remove comments
+	inputWithoutComments := withoutComment(input)
+	t := &Tokenizer{input: inputWithoutComments}
 	t.readChar()
 	return t
+}
+
+func withoutComment(input string) string {
+	result := ""
+	lines := strings.Split(input, "\n")
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		if len(trimmedLine) == 0 {
+			continue
+		}
+
+		lineWithoutComment := strings.Split(trimmedLine, "//")[0]
+
+		if len(lineWithoutComment) == 0 {
+			continue
+		}
+		result += lineWithoutComment + "\n"
+	}
+	return result
 }
 
 func (l *Tokenizer) readChar() {
